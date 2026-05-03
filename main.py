@@ -22,15 +22,11 @@ Show_Password_txt = "Show Password"
 staff_position = ""
 staff_name = ""
 
-# run the funtions
-def magage_users():
-    pass
-
-def inventory_mang():
-    pass
-
-def inventory_count():
-    pass
+# funtions
+def show_frame(window_main, frame, text):
+    """Brings the frame to the front and chnmages the title"""
+    window_main.title(text)
+    frame.tkraise()
 
 def main_window():
     """Create the main window and call the other layers"""
@@ -43,25 +39,38 @@ def main_window():
         window_main.config(bg=BG_COLOR)
         window_main.resizable(width=False, height=False)
 
-        # page selcetor 
+        # frames
+        # page selcetor
         win_frame = tk.Frame(master=window_main,bg=WHITE)
         win_frame.place(x=15,y=15,width=870,height=125)
+        # magege users
+        users_frame = tk.Frame(master=window_main,bg=BG_COLOR)
+        users_frame.place(x=15,y=150,width=870,height=480)
+        # inventory management
+        mang_frame = tk.Frame(master=window_main,bg=BG_COLOR)
+        mang_frame.place(x=15,y=150,width=870,height=480)
+        # inventory count
+        count_frame = tk.Frame(master=window_main,bg=BG_COLOR)
+        count_frame.place(x=15,y=150,width=870,height=480)
 
-        # page buttons
+        # page buttons for page selcetor
         users = tk.Button(win_frame, text="Manage users", cursor="hand2", 
                           font=('Arial', 17,"bold"), bg=LABEL_COLOR, width=19, 
                           height=3, highlightcolor=BLACK, bd=1, relief="solid", 
-                          command=lambda: magage_users())
+                          command=lambda: show_frame(window_main, users_frame, 
+                                                     "Manage users"))
         users.place(x=5, y=15)
-        mang = tk.Button(win_frame, text="inventory management", cursor="hand2", 
+        mang = tk.Button(win_frame, text="Inventory management", cursor="hand2", 
                           font=('Arial', 17,"bold"), bg=LABEL_COLOR, width=19, 
                           height=3, highlightcolor=BLACK, bd=1, relief="solid", 
-                          command=lambda: magage_users())
+                          command=lambda: show_frame(window_main, mang_frame, 
+                                                     "Inventory management"))
         mang.place(x=300, y=15)
-        count = tk.Button(win_frame, text="inventory count", cursor="hand2", 
+        count = tk.Button(win_frame, text="Inventory count", cursor="hand2", 
                           font=('Arial', 17,"bold"), bg=LABEL_COLOR, width=19, 
                           height=3, highlightcolor=BLACK, bd=1, relief="solid", 
-                          command=lambda: magage_users())
+                          command=lambda: show_frame(window_main, count_frame, 
+                                                     "Inventory count"))
         count.place(x=590, y=15)
 
         window_main.mainloop()
@@ -191,6 +200,6 @@ def sign_in():
 while __name__ == "__main__":
     """run the program"""
     # start the login process
-    sign_in()
+    main_window()
     
     break
