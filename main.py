@@ -19,6 +19,60 @@ exit = False
 login = False
 is_visable = "*"
 Show_Password_txt = "Show Password"
+staff_position = ""
+staff_name = ""
+
+# run the funtions
+def magage_users():
+    pass
+
+def inventory_mang():
+    pass
+
+def inventory_count():
+    pass
+
+def main_window():
+    """Create the main window and call the other layers"""
+    global exit, title
+    while exit == False:
+        # Create the mian menu window
+        window_main = tk.Tk()
+        window_main.title("main window")
+        window_main.geometry("900x650")
+        window_main.config(bg=BG_COLOR)
+        window_main.resizable(width=False, height=False)
+
+        # page selcetor 
+        win_frame = tk.Frame(master=window_main,bg=WHITE)
+        win_frame.place(x=15,y=15,width=870,height=125)
+
+        # page buttons
+        users = tk.Button(win_frame, text="Manage users", cursor="hand2", 
+                          font=('Arial', 17,"bold"), bg=LABEL_COLOR, width=19, 
+                          height=3, highlightcolor=BLACK, bd=1, relief="solid", 
+                          command=lambda: magage_users())
+        users.place(x=5, y=15)
+        mang = tk.Button(win_frame, text="inventory management", cursor="hand2", 
+                          font=('Arial', 17,"bold"), bg=LABEL_COLOR, width=19, 
+                          height=3, highlightcolor=BLACK, bd=1, relief="solid", 
+                          command=lambda: magage_users())
+        mang.place(x=300, y=15)
+        count = tk.Button(win_frame, text="inventory count", cursor="hand2", 
+                          font=('Arial', 17,"bold"), bg=LABEL_COLOR, width=19, 
+                          height=3, highlightcolor=BLACK, bd=1, relief="solid", 
+                          command=lambda: magage_users())
+        count.place(x=590, y=15)
+
+        window_main.mainloop()
+
+        if exit == False:
+                # exit the program if the user clicks the exit button
+                exit = messagebox.askokcancel("Exit", 
+                "Are you sure you want to exit?")
+        else:
+            # exit the program if the user clicks the exit button
+            break
 
 def show_password(password_entry):
     """show and hide the password"""
@@ -35,7 +89,7 @@ def show_password(password_entry):
 
 def check_login(username_entry, password_entry, window):
     """Check if the username and password are correct"""
-    global login, staff_id, staff_name
+    global login, staff_position, staff_name
     # connect to the database
     with sqlite3.connect(DATABASE) as d_b:
         
@@ -48,14 +102,14 @@ def check_login(username_entry, password_entry, window):
         if not results == []:
             messagebox.showinfo("Login", 
                                 f"Login successful! \n Welcome {results[0][0]}")
-            
-            # get the staff id and name from the database
-            qrl = f"""SELECT staff_id, name FROM Staff WHERE username = 
-            "{username_entry.get()}" AND password = "{password_entry.get()}";"""
+            staff_name = results[0][0]
+
+            # get the position from the database
+            qrl = f"""SELECT position FROM Staff WHERE username = 
+            "{username_entry.get()}";"""
             cursor.execute(qrl)
             results = cursor.fetchall()
-            staff_id = results[0][0]
-            staff_name = results[0][1]
+            staff_position = results[0][0]
 
             # close the login window
             window.destroy()
@@ -80,8 +134,12 @@ def sign_in():
 
         # Create the mian Frame
         frame = tk.Frame(master=window, bg=WHITE)
-        frame.place(x=200, y=25, width=600, height=600)
+        frame.place(x=200, y=75, width=600, height=500)
 
+        # text
+        text = tk.Label(frame, text="login", font=('Arial',25,"bold"), bg=WHITE)
+        text.place(x=250, y=15)
+        
         # Create the login feilds
         username_label = tk.Label(frame, text="Username", 
                                   font=('Arial',15,"bold"), bg=WHITE) 
@@ -100,6 +158,7 @@ def sign_in():
         # show password button
         show_password_b = tk.Button(frame, text=Show_Password_txt, cursor="hand2", 
                                   font=('Arial', 12), bg=LABEL_COLOR, 
+                                  highlightcolor=BLACK, bd=1, relief="solid", 
                                   command=lambda password_entry=password_entry: 
                                   show_password(password_entry))
         show_password_b.place(x=350, y=300)
@@ -107,6 +166,7 @@ def sign_in():
         # Create the login button
         login_button = tk.Button(frame, text="sign in", cursor="hand2",
                                  font=('Arial', 15,"bold"), bg=LABEL_COLOR, 
+                                 highlightcolor=BLACK, bd=1, relief="solid", 
                                  width=10, height=2, command=lambda 
                                  username_entry=username_entry, 
                                  password_entry=password_entry, window=window:
@@ -126,6 +186,7 @@ def sign_in():
             break
         global order_id, order_no
         # run rest of program
+        main_window()
 
 while __name__ == "__main__":
     """run the program"""
