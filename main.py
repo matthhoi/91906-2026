@@ -28,9 +28,34 @@ def show_frame(window_main, frame, text):
     window_main.title(text)
     frame.tkraise()
 
+def permissions(window_main, frame, button):
+    """Check the users permissions"""
+    global staff_position
+    if button == "manage users":
+        if staff_position == "Admin":
+            show_frame(window_main, frame, "manage users")
+        else:
+            messagebox.showerror("Error", "You don't have the correct " \
+            "permissions")
+    elif button == "Inventory management":
+        if staff_position == "Manager" or staff_position == "Admin":
+            show_frame(window_main, frame, "Inventory management")
+        else:
+            messagebox.showerror("Error", "You don't have the correct " \
+            "permissions")
+
+def manage_users(frame):
+    pass
+
+def inventory_management(frame):
+    pass
+
+def inventory_count(frame):
+    pass
+
 def main_window():
     """Create the main window and call the other layers"""
-    global exit, title
+    global exit
     while exit == False:
         # Create the mian menu window
         window_main = tk.Tk()
@@ -43,27 +68,33 @@ def main_window():
         # page selcetor
         win_frame = tk.Frame(master=window_main,bg=WHITE)
         win_frame.place(x=15,y=15,width=870,height=125)
-        # magege users
+
+        # manage users
         users_frame = tk.Frame(master=window_main,bg=BG_COLOR)
         users_frame.place(x=15,y=150,width=870,height=480)
+        manage_users(users_frame)
+
         # inventory management
         mang_frame = tk.Frame(master=window_main,bg=BG_COLOR)
         mang_frame.place(x=15,y=150,width=870,height=480)
+        inventory_management(mang_frame)
+
         # inventory count
         count_frame = tk.Frame(master=window_main,bg=BG_COLOR)
         count_frame.place(x=15,y=150,width=870,height=480)
+        inventory_count(count_frame)
 
         # page buttons for page selcetor
-        users = tk.Button(win_frame, text="Manage users", cursor="hand2", 
+        users = tk.Button(win_frame, text="manage users", cursor="hand2", 
                           font=('Arial', 17,"bold"), bg=LABEL_COLOR, width=19, 
                           height=3, highlightcolor=BLACK, bd=1, relief="solid", 
-                          command=lambda: show_frame(window_main, users_frame, 
-                                                     "Manage users"))
+                          command=lambda: permissions(window_main, users_frame, 
+                                                     "manage users"))
         users.place(x=5, y=15)
         mang = tk.Button(win_frame, text="Inventory management", cursor="hand2", 
                           font=('Arial', 17,"bold"), bg=LABEL_COLOR, width=19, 
                           height=3, highlightcolor=BLACK, bd=1, relief="solid", 
-                          command=lambda: show_frame(window_main, mang_frame, 
+                          command=lambda: permissions(window_main, mang_frame, 
                                                      "Inventory management"))
         mang.place(x=300, y=15)
         count = tk.Button(win_frame, text="Inventory count", cursor="hand2", 
