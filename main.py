@@ -6,6 +6,7 @@ By: Matt Smith                                                    00/00/2026"""
 import tkinter as tk
 from tkinter import messagebox
 import sqlite3
+import report
 
 # constants
 DATABASE = "91906-2026\91906-database.db"
@@ -21,6 +22,9 @@ is_visable = "*"
 Show_Password_txt = "Show Password"
 staff_position = ""
 staff_name = ""
+order_list = []
+total_price = 0.0
+inventory_list = []
 
 # funtions
 def show_frame(window_main, frame, text):
@@ -51,6 +55,11 @@ def inventory_management(frame):
     pass
 
 def inventory_count(frame):
+    gen_report =  tk.Button(frame, text="Generate report", cursor="hand2", 
+                            font=('Arial', 17,"bold"), bg=LABEL_COLOR, width=19,
+                            height=3, highlightcolor=BLACK, bd=1, 
+                            relief="solid", command=lambda: report.report())
+    gen_report.place(x=590,y=150)
     pass
 
 def main_window():
