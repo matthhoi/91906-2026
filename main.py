@@ -35,12 +35,14 @@ def show_frame(window_main, frame, text):
 def permissions(window_main, frame, button):
     """Check the users permissions"""
     global staff_position
+    # check if the user has the admin permissions
     if button == "manage users":
         if staff_position == "Admin":
             show_frame(window_main, frame, "manage users")
         else:
             messagebox.showerror("Error", "You don't have the correct " \
             "permissions")
+    # check if the user has the admin or manager permissions
     elif button == "Inventory management":
         if staff_position == "Manager" or staff_position == "Admin":
             show_frame(window_main, frame, "Inventory management")
@@ -49,16 +51,41 @@ def permissions(window_main, frame, button):
             "permissions")
 
 def manage_users(frame):
+    """All the buttons and lables for the users_frame"""
     pass
 
 def inventory_management(frame):
+    """All the buttons and lables for the mang_frame"""
     pass
 
+def make_report():
+    """get all the info from the database and add that info to the report"""
+    global staff_name, inventory_list
+    # conect with the database and get the products info
+    with sqlite3.connect(DATABASE) as d_b:
+        cursor = d_b.cursor()
+        qrl = f"""SELECT * from products;"""
+        cursor.execute(qrl)
+        results = cursor.fetchall()
+        # put the resaults into the prodcts .py funtion
+        for x in results:
+            x -= 1
+            results[x][1] = products.products(results[x][0], results[x][1], 
+                                              results[x][3], results[x][4], 
+                                              results[x][5])
+            results[x][1].invotory_count(results[x][8])
+            results[x][1].stock_purcase(results[x][6])
+            # put the item in the list
+            inventory_list.append(results[x][1])
+        # run the report program
+        report.report(inventory_list, staff_name)
+
 def inventory_count(frame):
+    """All the buttons and lables for the count_frame"""
     gen_report =  tk.Button(frame, text="Generate report", cursor="hand2", 
                             font=('Arial', 17,"bold"), bg=LABEL_COLOR, width=19,
                             height=3, highlightcolor=BLACK, bd=1, 
-                            relief="solid", command=lambda: report.report())
+                            relief="solid", command=lambda: make_report())
     gen_report.place(x=590,y=150)
     pass
 
