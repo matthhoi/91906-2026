@@ -1,6 +1,6 @@
 """This is a place to sore the classes for my Python program to make the code
 smaller on each page
-By: Matt Smith                                                    11/05/2026"""
+By: Matt Smith                                                    13/05/2026"""
 
 
 class products:
@@ -9,7 +9,7 @@ class products:
         # initial information
         self.barcode = barcode
         self.product_name = name
-        product_type = type
+        self.product_type = type
         self.subtype = subtype
         self.cost = cost
         self.old = amount

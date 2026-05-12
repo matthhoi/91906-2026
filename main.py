@@ -73,11 +73,7 @@ def make_report():
             product = products.products(results[x][0], results[x][1],
                                               results[x][2], results[x][3],
                                               results[x][4], results[x][5])
-            if x == 0:
-                b = 226
-            else:
-                b = 26
-            product.invotory_count(b)
+            product.invotory_count(results[x][7])
             product.stock_purcase(results[x][6])
             # put the item in the list
             inventory_list.append(product)
@@ -271,6 +267,6 @@ def sign_in():
 while __name__ == "__main__":
     """run the program"""
     # start the login process
-    main_window()
+    sign_in()
     
     break
