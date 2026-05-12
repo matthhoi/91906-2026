@@ -7,6 +7,7 @@ import tkinter as tk
 from tkinter import messagebox
 import sqlite3
 import report
+import products
 
 # constants
 DATABASE = "91906-2026\91906-database.db"
@@ -68,15 +69,18 @@ def make_report():
         cursor.execute(qrl)
         results = cursor.fetchall()
         # put the resaults into the prodcts .py funtion
-        for x in results:
-            x -= 1
-            results[x][1] = products.products(results[x][0], results[x][1], 
-                                              results[x][3], results[x][4], 
-                                              results[x][5])
-            results[x][1].invotory_count(results[x][8])
-            results[x][1].stock_purcase(results[x][6])
+        for x in range(0, len(results)):
+            product = products.products(results[x][0], results[x][1],
+                                              results[x][2], results[x][3],
+                                              results[x][4], results[x][5])
+            if x == 0:
+                b = 226
+            else:
+                b = 26
+            product.invotory_count(b)
+            product.stock_purcase(results[x][6])
             # put the item in the list
-            inventory_list.append(results[x][1])
+            inventory_list.append(product)
         # run the report program
         report.report(inventory_list, staff_name)
 
