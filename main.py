@@ -8,9 +8,11 @@ from tkinter import messagebox
 import sqlite3
 import report
 import products
+from tkinter import ttk
 
 # constants
 DATABASE = "91906-2026\91906-database.db"
+BUTTONS = "#C5C2D0"
 BG_COLOR = "#cccccc"
 LABEL_COLOR = "#efefef"
 WHITE = "#ffffff"
@@ -59,6 +61,20 @@ def inventory_management(frame):
     """All the buttons and lables for the mang_frame"""
     pass
 
+def on_type(event):
+    """sorts the data in options"""
+    global combo, options
+    # Get current text from the combobox
+    typed_text = combo.get()
+    
+    if typed_text == '':
+        # Reset to full list if search is empty
+        combo['values'] = options
+    else:
+        # Filter list based on typed characters (case-insensitive)
+        filtered_data = [item for item in options if typed_text.lower() in item.lower()]
+        combo['values'] = filtered_data
+
 def make_report():
     """get all the info from the database and add that info to the report"""
     global staff_name, inventory_list
@@ -80,14 +96,54 @@ def make_report():
         # run the report program
         report.report(inventory_list, staff_name)
 
+def valadate(num_entry, combo, options):
+    """ """
+    if num_entry.isdigit():
+        pass
+    else:
+        pass
+
 def inventory_count(frame):
     """All the buttons and lables for the count_frame"""
+    global combo, options
+    # labels
+    Select_label = tk.Label(frame, text="Select product", 
+                          font=('Arial', 20,"bold"), bg=BG_COLOR) 
+    Select_label.place(x=50, y=50)
+    
+    # entrys
+    num_entry = tk.Entry(frame, font=('Arial', 15,"bold"), bg=BUTTONS)
+    num_entry.place(x=300, y=150)
+
+    # conect with the database and get data
+    with sqlite3.connect(DATABASE) as d_b:
+        cursor = d_b.cursor()
+        qrl = f"""SELECT name from products;"""
+        cursor.execute(qrl)
+        results = cursor.fetchall()
+
+    # get the data into options
+    options = []
+    for x in range(0, len(results)):
+        options.append(results[x][0])
+    
+    # create the combo box
+    combo = ttk.Combobox(frame, values=options, font=('Arial', 15))
+    combo.place(x=30, y=150)
+
+    # Bind key release to the search function
+    combo.bind('<KeyRelease>', on_type)
+    # buttons
     gen_report =  tk.Button(frame, text="Generate report", cursor="hand2", 
-                            font=('Arial', 17,"bold"), bg=LABEL_COLOR, width=19,
+                            font=('Arial', 17,"bold"), bg=BUTTONS, width=19,
                             height=3, highlightcolor=BLACK, bd=1, 
                             relief="solid", command=lambda: make_report())
-    gen_report.place(x=590,y=150)
-    pass
+    gen_report.place(x=590, y=350)
+    Save_changes =  tk.Button(frame, text="Save changes", cursor="hand2", 
+                            font=('Arial', 17,"bold"), bg=BUTTONS, width=19,
+                            height=3, highlightcolor=BLACK, bd=1, 
+                            relief="solid")
+    Save_changes.place(x=590, y=25)
 
 def main_window():
     """Create the main window and call the other layers"""
@@ -267,6 +323,6 @@ def sign_in():
 while __name__ == "__main__":
     """run the program"""
     # start the login process
-    sign_in()
+    main_window()
     
     break
