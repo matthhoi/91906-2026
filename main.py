@@ -97,10 +97,19 @@ def make_report():
         # run the report program
         report.report(inventory_list, staff_name)
 
-def valadate(num_entry, combo, options):
-    """ """
-    if num_entry.isdigit():
-        pass
+def validate(num_entry, combo, options):
+    """validate the entries"""
+    # validate entries
+    if num_entry.isdigit() and combo in options:
+        try:
+            with sqlite3.connect(DATABASE) as d_b:
+                cursor = d_b.cursor()
+                qrl = f"""UPDATE Products SET count = "{num_entry}" WHERE name 
+                = "{combo}";"""
+                cursor.execute(qrl)
+                messagebox.showinfo("success", "successfully updated database")
+        except:
+            messagebox.showerror("error", "something has goon wrong")
     else:
         messagebox.showerror("error", "Number of products has to be a number "
         "and or product has to be selected")
@@ -111,11 +120,14 @@ def inventory_count(frame):
     # labels
     Select_label = tk.Label(frame, text="Select product", 
                           font=('Arial', 20,"bold"), bg=BG_COLOR) 
-    Select_label.place(x=50, y=50)
+    Select_label.place(x=40, y=50)
+    num_of_label = tk.Label(frame, text="Number of product", 
+                          font=('Arial', 20,"bold"), bg=BG_COLOR) 
+    num_of_label.place(x=300, y=50)
     
     # entries
     num_entry = tk.Entry(frame, font=('Arial', 15,"bold"), bg=BUTTONS)
-    num_entry.place(x=300, y=150)
+    num_entry.place(x=310, y=150, height=40)
 
     # connect with the database and get data
     with sqlite3.connect(DATABASE) as d_b:
@@ -131,7 +143,7 @@ def inventory_count(frame):
     
     # create the combo box
     combo = ttk.Combobox(frame, values=options, font=('Arial', 15))
-    combo.place(x=30, y=150)
+    combo.place(x=30, y=150, height=40)
 
     # Bind key release to the search function
     combo.bind('<KeyRelease>', on_type)
