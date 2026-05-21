@@ -30,6 +30,13 @@ total_price = 0.0
 inventory_list = []
 
 # functions
+def save_changes(table, column, data, where, thing):
+    with sqlite3.connect(DATABASE) as d_b:
+                cursor = d_b.cursor()
+                qrl = f"""UPDATE {table} SET {column} = "{data}" WHERE {where} 
+                = "{thing}";"""
+                cursor.execute(qrl)
+
 def show_frame(window_main, frame, text):
     """Brings the frame to the front and chantages the title"""
     window_main.title(text)
@@ -102,12 +109,8 @@ def validate(num_entry, combo, options):
     # validate entries
     if num_entry.isdigit() and combo in options:
         try:
-            with sqlite3.connect(DATABASE) as d_b:
-                cursor = d_b.cursor()
-                qrl = f"""UPDATE Products SET count = "{num_entry}" WHERE name 
-                = "{combo}";"""
-                cursor.execute(qrl)
-                messagebox.showinfo("success", "successfully updated database")
+            save_changes("Products", "count", num_entry, "name", combo)
+            messagebox.showinfo("success", "successfully updated database")
         except:
             messagebox.showerror("error", "something has goon wrong")
     else:
