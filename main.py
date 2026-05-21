@@ -21,7 +21,7 @@ BLACK = "#000000"
 # global variables
 exit = False
 login = False
-is_visable = "*"
+is_visible = "*"
 Show_Password_txt = "Show Password"
 staff_position = ""
 staff_name = ""
@@ -29,9 +29,9 @@ order_list = []
 total_price = 0.0
 inventory_list = []
 
-# funtions
+# functions
 def show_frame(window_main, frame, text):
-    """Brings the frame to the front and chnmages the title"""
+    """Brings the frame to the front and chantages the title"""
     window_main.title(text)
     frame.tkraise()
 
@@ -54,11 +54,11 @@ def permissions(window_main, frame, button):
             "permissions")
 
 def manage_users(frame):
-    """All the buttons and lables for the users_frame"""
+    """All the buttons and labels for the users_frame"""
     pass
 
 def inventory_management(frame):
-    """All the buttons and lables for the mang_frame"""
+    """All the buttons and labels for the mang_frame"""
     pass
 
 def on_type(event):
@@ -72,25 +72,26 @@ def on_type(event):
         combo['values'] = options
     else:
         # Filter list based on typed characters (case-insensitive)
-        filtered_data = [item for item in options if typed_text.lower() in item.lower()]
+        filtered_data = [item for item in options if typed_text.lower() in 
+                         item.lower()]
         combo['values'] = filtered_data
 
 def make_report():
     """get all the info from the database and add that info to the report"""
     global staff_name, inventory_list
-    # conect with the database and get the products info
+    # connect with the database and get the products info
     with sqlite3.connect(DATABASE) as d_b:
         cursor = d_b.cursor()
         qrl = f"""SELECT * from products;"""
         cursor.execute(qrl)
         results = cursor.fetchall()
-        # put the resaults into the prodcts .py funtion
+        # put the results into the products .py function
         for x in range(0, len(results)):
             product = products.products(results[x][0], results[x][1],
                                               results[x][2], results[x][3],
                                               results[x][4], results[x][5])
-            product.invotory_count(results[x][7])
-            product.stock_purcase(results[x][6])
+            product.inventory_count(results[x][7])
+            product.stock_purchase(results[x][6])
             # put the item in the list
             inventory_list.append(product)
         # run the report program
@@ -101,21 +102,22 @@ def valadate(num_entry, combo, options):
     if num_entry.isdigit():
         pass
     else:
-        pass
+        messagebox.showerror("error", "Number of products has to be a number "
+        "and or product has to be selected")
 
 def inventory_count(frame):
-    """All the buttons and lables for the count_frame"""
+    """All the buttons and labels for the count_frame"""
     global combo, options
     # labels
     Select_label = tk.Label(frame, text="Select product", 
                           font=('Arial', 20,"bold"), bg=BG_COLOR) 
     Select_label.place(x=50, y=50)
     
-    # entrys
+    # entries
     num_entry = tk.Entry(frame, font=('Arial', 15,"bold"), bg=BUTTONS)
     num_entry.place(x=300, y=150)
 
-    # conect with the database and get data
+    # connect with the database and get data
     with sqlite3.connect(DATABASE) as d_b:
         cursor = d_b.cursor()
         qrl = f"""SELECT name from products;"""
@@ -142,14 +144,15 @@ def inventory_count(frame):
     Save_changes =  tk.Button(frame, text="Save changes", cursor="hand2", 
                             font=('Arial', 17,"bold"), bg=BUTTONS, width=19,
                             height=3, highlightcolor=BLACK, bd=1, 
-                            relief="solid")
+                            relief="solid", command=lambda: validate
+                            (num_entry.get(), combo.get(), options))
     Save_changes.place(x=590, y=25)
 
 def main_window():
     """Create the main window and call the other layers"""
     global exit
     while exit == False:
-        # Create the mian menu window
+        # Create the main menu window
         window_main = tk.Tk()
         window_main.title("main window")
         window_main.geometry("900x650")
@@ -157,7 +160,7 @@ def main_window():
         window_main.resizable(width=False, height=False)
 
         # frames
-        # page selcetor
+        # page selector
         win_frame = tk.Frame(master=window_main,bg=WHITE)
         win_frame.place(x=15,y=15,width=870,height=125)
 
@@ -176,7 +179,7 @@ def main_window():
         count_frame.place(x=15,y=150,width=870,height=480)
         inventory_count(count_frame)
 
-        # page buttons for page selcetor
+        # page buttons for page selector
         users = tk.Button(win_frame, text="manage users", cursor="hand2", 
                           font=('Arial', 17,"bold"), bg=LABEL_COLOR, width=19, 
                           height=3, highlightcolor=BLACK, bd=1, relief="solid", 
@@ -208,15 +211,15 @@ def main_window():
 
 def show_password(password_entry):
     """show and hide the password"""
-    global is_visable, Show_Password_txt
+    global is_visible, Show_Password_txt
     # toggle the visibility of the password entry field
-    if is_visable == "*":
-        is_visable = ""
-        password_entry.config(show=is_visable)
+    if is_visible == "*":
+        is_visible = ""
+        password_entry.config(show=is_visible)
         Show_Password_txt = "Hide Password"
     else:
-        is_visable = "*"
-        password_entry.config(show=is_visable)
+        is_visible = "*"
+        password_entry.config(show=is_visible)
         Show_Password_txt = "Show Password"
 
 def check_login(username_entry, password_entry, window):
@@ -253,7 +256,7 @@ def check_login(username_entry, password_entry, window):
 
 def sign_in():
     """Sign in the user"""
-    global login, exit, is_visable, Show_Password_txt
+    global login, exit, is_visible, Show_Password_txt
     login = False
     # login window
     while login == False:
@@ -264,7 +267,7 @@ def sign_in():
         window.config(bg=BG_COLOR)
         window.resizable(width=False, height=False)
 
-        # Create the mian Frame
+        # Create the main Frame
         frame = tk.Frame(master=window, bg=WHITE)
         frame.place(x=200, y=75, width=600, height=500)
 
@@ -272,14 +275,14 @@ def sign_in():
         text = tk.Label(frame, text="login", font=('Arial',25,"bold"), bg=WHITE)
         text.place(x=250, y=15)
         
-        # Create the login feilds
+        # Create the login fields
         username_label = tk.Label(frame, text="Username", 
                                   font=('Arial',15,"bold"), bg=WHITE) 
         username_entry = tk.Entry(frame, width=75, bg=BG_COLOR, relief="flat", 
                                   highlightbackground=BLACK, highlightthickness=1)
         password_label = tk.Label(frame, text="Password", 
                                   font=('Arial',15,"bold"), bg=WHITE)
-        password_entry = tk.Entry(frame, show=is_visable, width=75, bg=BG_COLOR, 
+        password_entry = tk.Entry(frame, show=is_visible, width=75, bg=BG_COLOR, 
                                   relief="flat", highlightbackground=BLACK, 
                                   highlightthickness=1)
         username_entry.place(x=25, y=130)
