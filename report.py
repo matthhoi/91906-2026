@@ -17,9 +17,9 @@ def report(inventory_list, staff_name):
     with open(f"report-{today.day}.{today.month}.{today.year}.txt", "w") as report:
         # Header Section
         report.write(f"{'-------------------- Report --------------------':^85}"
-                     f"\n{'Barcode':<15} {'Name':<20} {'(Qty)':<10} "
+                     f"\n{'Barcode':<15} {'Name':<12} {'(Qty)':<10} "
                      f"{'Old':<10} {'Purch':<10} {'Total':<10} {'Sold':<10} "
-                     f"{'New':<8}\n")
+                     f"{'New':<8} Missing\n")
         report.write("-" * 100 + "\n")
 
         total_old = 0
@@ -35,14 +35,15 @@ def report(inventory_list, staff_name):
 
             # adding to the to totals
             total_old += item[2]
-            total_new += item[4]
-            inv_value += item[4]*item[5]
-            total_sold += item[2]+item[3]-item[4]
-            total_sales += (item[2]+item[3])*item[5]
+            total_new += item[6]
+            inv_value += (item[6])*item[5]
+            total_sold += item[3]
+            total_sales += (item[3])*item[5]
             item_name = item[1][:25]  # Truncate name if too long
-            report.write(f"{item[0]:<15} {item_name:<20} {'':<10} {item[2]:<10}"
-                         f" {item[3]:<10} {(item[2]+item[3]):<10} "
-                         f"{(item[2]+item[3]-item[4]):<10} {item[4]:<8}\n")
+            report.write(f"{item[0]:<15} {item_name:<20} {'':<2} {item[2]:<10}"
+                         f" {item[4]:<10} {(item[2]+item[4]):<10} "
+                         f"{item[3]:<10} {item[6]:<8} "
+                         f"{(item[2]+item[4]-item[3]-item[6])}\n")
 
         report.write("-" * 100 + "\n")
 

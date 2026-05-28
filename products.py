@@ -15,10 +15,15 @@ class products:
         self.old = amount
         self.current = 0
         self.purchase = 0
+        self.sold = 0
 
     def inventory_count(self, amount):
         # tool to complete a inventory count
         self.current = amount
+
+    def stock_sold(self, amount):
+        # to increase the sold amount
+        self.sold = amount
 
     def stock_purchase(self, amount):
         # to increase the purchase amount
@@ -33,4 +38,4 @@ class products:
     def description(self):
         # info for the report
         return [self.barcode, self.product_name, self.old, self.purchase,
-                self.current, self.cost]
+                self.current, self.cost, self.sold]
