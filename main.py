@@ -39,7 +39,10 @@ def save_changes(table, column, data, where, thing):
 
 def show_frame(window_main, frame, text):
     """Brings the frame to the front and chantages the title"""
-    window_main.title(text)
+    if text == "no":
+        pass
+    else:
+        window_main.title(text)
     frame.tkraise()
 
 def permissions(window_main, frame, button):
@@ -60,14 +63,110 @@ def permissions(window_main, frame, button):
             messagebox.showerror("Error", "You don't have the correct " \
             "permissions")
 
+def validate(num_entry, combo, options, where):
+    """validate the entries"""
+    # validate entries
+    if num_entry.isdigit() and combo in options:
+        if where == 1:
+            save_changes("Products", "count", num_entry, "name", combo)
+            messagebox.showinfo("success", "successfully updated database")
+        elif where == 2:
+            save_changes("Products", "sold", num_entry, "name", combo)
+            messagebox.showinfo("success", "successfully updated database")
+    else:
+        messagebox.showerror("error", "Number of products has to be a number "
+        "and or product has to be selected")
+
+def combo_data():
+    """Get the data for the combo box from the database"""
+    # connect with the database and get data
+    with sqlite3.connect(DATABASE) as d_b:
+        cursor = d_b.cursor()
+        qrl = f"""SELECT name from products;"""
+        cursor.execute(qrl)
+        results = cursor.fetchall()
+
+    # get the data into options
+    options = []
+    for x in range(0, len(results)):
+        options.append(results[x][0])
+    return options
+
+# manage users
 def manage_users(frame):
     """All the buttons and labels for the users_frame"""
     pass
 
+# inventory management
+def stock_sold(frame):
+    """All the buttons and labels for stock sold in mang_frame"""
+    show_frame(frame, frame, "no")
+
+    # labels
+    Select_label = tk.Label(frame, text="Select product", 
+                          font=('Arial', 20,"bold"), bg=BG_COLOR) 
+    Select_label.place(x=300, y=50)
+    amount_label = tk.Label(frame, text="Amount sold", 
+                            font=('Arial', 20,"bold"), bg=BG_COLOR) 
+    amount_label.place(x=60, y=50)
+
+    # entries
+    num_entry = tk.Entry(frame, font=('Arial', 15,"bold"), bg=BUTTONS)
+    num_entry.place(x=40, y=150, height=40)
+
+    options = combo_data()
+
+    # create the combo box
+    combo = ttk.Combobox(frame, values=options, font=('Arial', 15))
+    combo.place(x=300, y=150, height=40)
+
+    # Bind key release to the search function
+    combo.bind('<KeyRelease>', on_type)
+
+    # buttons
+    Save_changes =  tk.Button(frame, text="Save changes", cursor="hand2", 
+                              font=('Arial', 17,"bold"), bg=BUTTONS, width=19,
+                              height=3, highlightcolor=BLACK, bd=1, 
+                              relief="solid", command=lambda: validate
+                              (num_entry.get(), combo.get(), options, 2))
+    Save_changes.place(x=590, y=25)
+
 def inventory_management(frame):
     """All the buttons and labels for the mang_frame"""
-    pass
+    # page selector frame
+    page_frame = tk.Frame(master=frame, bg=WHITE)
+    page_frame.place(x=20, y=15, width=825, height=150)
+    
+    # frames
+    sold_frame = tk.Frame(master=frame, bg=BG_COLOR)
+    sold_frame.place(x=0, y=180, width=870, height=300)
+    purchase_frame = tk.Frame(master=frame, bg=BG_COLOR)
+    purchase_frame.place(x=0, y=180, width=870, height=300)
+    remove_frame = tk.Frame(master=frame, bg=BG_COLOR)
+    remove_frame.place(x=0, y=180, width=870, height=300)
+    add_frame = tk.Frame(master=frame, bg=BG_COLOR)
+    add_frame.place(x=0, y=180, width=870, height=300)
 
+    # page buttons for page selector
+    sold = tk.Button(page_frame, text="Stock Sold", cursor="hand2", 
+                     font=('Arial', 17,"bold"), bg=LABEL_COLOR, width=13, 
+                     height=4, highlightcolor=BLACK, bd=1, relief="solid", 
+                     command=lambda: stock_sold(sold_frame))
+    sold.place(x=5, y=15)
+    purchase = tk.Button(page_frame, text="Stock purchase", cursor="hand2", 
+                         font=('Arial', 17,"bold"), bg=LABEL_COLOR, width=13, 
+                         height=4, highlightcolor=BLACK, bd=1, relief="solid")
+    purchase.place(x=210, y=15)
+    remove = tk.Button(page_frame, text="Remove a \nproduct", cursor="hand2", 
+                       font=('Arial', 17,"bold"), bg=LABEL_COLOR, width=13, 
+                       height=4, highlightcolor=BLACK, bd=1, relief="solid")
+    remove.place(x=420, y=15)
+    add = tk.Button(page_frame, text="add a product", cursor="hand2", 
+                    font=('Arial', 17,"bold"), bg=LABEL_COLOR, width=13, 
+                    height=4, highlightcolor=BLACK, bd=1, relief="solid")
+    add.place(x=630, y=15)
+
+# inventory count
 def on_type(event):
     """sorts the data in options"""
     global combo, options
@@ -94,28 +193,16 @@ def make_report():
         results = cursor.fetchall()
         # put the results into the products .py function
         for x in range(0, len(results)):
-            product = products.products(results[x][0], results[x][1],
-                                              results[x][2], results[x][3],
-                                              results[x][4], results[x][5])
+            product = products.products(results[x][0], results[x][1], 
+                                        results[x][2], results[x][3], 
+                                        results[x][4], results[x][5])
+            product.stock_sold(results[x][8])
             product.inventory_count(results[x][7])
             product.stock_purchase(results[x][6])
             # put the item in the list
             inventory_list.append(product)
         # run the report program
         report.report(inventory_list, staff_name)
-
-def validate(num_entry, combo, options):
-    """validate the entries"""
-    # validate entries
-    if num_entry.isdigit() and combo in options:
-        try:
-            save_changes("Products", "count", num_entry, "name", combo)
-            messagebox.showinfo("success", "successfully updated database")
-        except:
-            messagebox.showerror("error", "something has goon wrong")
-    else:
-        messagebox.showerror("error", "Number of products has to be a number "
-        "and or product has to be selected")
 
 def inventory_count(frame):
     """All the buttons and labels for the count_frame"""
@@ -131,19 +218,9 @@ def inventory_count(frame):
     # entries
     num_entry = tk.Entry(frame, font=('Arial', 15,"bold"), bg=BUTTONS)
     num_entry.place(x=310, y=150, height=40)
-
-    # connect with the database and get data
-    with sqlite3.connect(DATABASE) as d_b:
-        cursor = d_b.cursor()
-        qrl = f"""SELECT name from products;"""
-        cursor.execute(qrl)
-        results = cursor.fetchall()
-
-    # get the data into options
-    options = []
-    for x in range(0, len(results)):
-        options.append(results[x][0])
     
+    options = combo_data()
+
     # create the combo box
     combo = ttk.Combobox(frame, values=options, font=('Arial', 15))
     combo.place(x=30, y=150, height=40)
@@ -160,9 +237,10 @@ def inventory_count(frame):
                             font=('Arial', 17,"bold"), bg=BUTTONS, width=19,
                             height=3, highlightcolor=BLACK, bd=1, 
                             relief="solid", command=lambda: validate
-                            (num_entry.get(), combo.get(), options))
+                            (num_entry.get(), combo.get(), options, 1))
     Save_changes.place(x=590, y=25)
 
+# main
 def main_window():
     """Create the main window and call the other layers"""
     global exit
@@ -176,22 +254,22 @@ def main_window():
 
         # frames
         # page selector
-        win_frame = tk.Frame(master=window_main,bg=WHITE)
-        win_frame.place(x=15,y=15,width=870,height=125)
+        win_frame = tk.Frame(master=window_main, bg=WHITE)
+        win_frame.place(x=15, y=15, width=870, height=125)
 
         # manage users
-        users_frame = tk.Frame(master=window_main,bg=BG_COLOR)
-        users_frame.place(x=15,y=150,width=870,height=480)
+        users_frame = tk.Frame(master=window_main, bg=BG_COLOR)
+        users_frame.place(x=15, y=150, width=870, height=480)
         manage_users(users_frame)
 
         # inventory management
-        mang_frame = tk.Frame(master=window_main,bg=BG_COLOR)
-        mang_frame.place(x=15,y=150,width=870,height=480)
+        mang_frame = tk.Frame(master=window_main, bg=BG_COLOR)
+        mang_frame.place(x=15, y=150, width=870, height=480)
         inventory_management(mang_frame)
 
         # inventory count
-        count_frame = tk.Frame(master=window_main,bg=BG_COLOR)
-        count_frame.place(x=15,y=150,width=870,height=480)
+        count_frame = tk.Frame(master=window_main, bg=BG_COLOR)
+        count_frame.place(x=15, y=150, width=870, height=480)
         inventory_count(count_frame)
 
         # page buttons for page selector
@@ -224,6 +302,7 @@ def main_window():
             # exit the program if the user clicks the exit button
             break
 
+# login
 def show_password(password_entry):
     """show and hide the password"""
     global is_visible, Show_Password_txt
@@ -255,7 +334,7 @@ def check_login(username_entry, password_entry, window):
             staff_name = results[0][0]
 
             # get the position from the database
-            qrl = f"""SELECT position FROM Staff WHERE username = 
+            qrl = f"""SELECT permissions FROM Staff WHERE username = 
             "{username_entry.get()}";"""
             cursor.execute(qrl)
             results = cursor.fetchall()
