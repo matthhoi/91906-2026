@@ -1,5 +1,5 @@
-"""This is a Python program that will be for owners of small shops. It will 
-connect with a database and allow staff to complete inventory count, generate 
+"""This is a Python program that will be for owners of small shops. It will
+connect with a database and allow staff to complete inventory count, generate
 reports, and add new stock or remove old stock
 By: Matt Smith                                                    00/00/2026"""
 
@@ -23,7 +23,7 @@ exit = False
 login = False
 is_visible = "*"
 Show_Password_txt = "Show Password"
-staff_position = ""
+staff_position = "Admin"
 staff_name = ""
 order_list = []
 total_price = 0.0
@@ -32,10 +32,10 @@ inventory_list = []
 # functions
 def save_changes(table, column, data, where, thing):
     with sqlite3.connect(DATABASE) as d_b:
-                cursor = d_b.cursor()
-                qrl = f"""UPDATE {table} SET {column} = "{data}" WHERE {where} 
-                = "{thing}";"""
-                cursor.execute(qrl)
+        cursor = d_b.cursor()
+        qrl = f"""UPDATE {table} SET {column} = "{data}" WHERE {where} 
+        = "{thing}";"""
+        cursor.execute(qrl)
 
 def show_frame(window_main, frame, text):
     """Brings the frame to the front and chantages the title"""
@@ -53,15 +53,15 @@ def permissions(window_main, frame, button):
         if staff_position == "Admin":
             show_frame(window_main, frame, "manage users")
         else:
-            messagebox.showerror("Error", "You don't have the correct " \
-            "permissions")
+            messagebox.showerror("Error", "You don't have the correct "
+                                 "permissions")
     # check if the user has the admin or manager permissions
     elif button == "Inventory management":
         if staff_position == "Manager" or staff_position == "Admin":
             show_frame(window_main, frame, "Inventory management")
         else:
-            messagebox.showerror("Error", "You don't have the correct " \
-            "permissions")
+            messagebox.showerror("Error", "You don't have the correct "
+                                 "permissions")
 
 def validate(num_entry, combo, options, where):
     """validate the entries"""
@@ -92,22 +92,108 @@ def combo_data():
         options.append(results[x][0])
     return options
 
+def on_type(event):
+    """sorts the data in options"""
+    global combo, options
+    # Get current text from the combobox
+    typed_text = combo.get()
+    
+    if typed_text == '':
+        # Reset to full list if search is empty
+        combo['values'] = options
+    else:
+        # Filter list based on typed characters (case-insensitive)
+        filtered_data = [item for item in options if typed_text.lower() in 
+                         item.lower()]
+        combo['values'] = filtered_data
+
 # manage users
 def manage_users(frame):
     """All the buttons and labels for the users_frame"""
     pass
 
 # inventory management
+def purchase(num_entry, combo, options, cost_entry):
+    """validate the entries and get the data need to update the database"""
+    # validate entries
+    if num_entry.get().isdigit() and combo.get() in options and \
+        float(cost_entry.get()):
+        if float(cost_entry.get()) > 0:
+            with sqlite3.connect(DATABASE) as d_b:
+                cursor = d_b.cursor()
+                qrl = f"""SELECT cost, amount, purchase FROM Products WHERE 
+                name = "{combo.get()}";"""
+                cursor.execute(qrl)
+                results = cursor.fetchall()
+                current_total_value = results[0][1] * results[0][0]
+                new_total_value = int(num_entry.get()) * float(cost_entry.get())
+                total_quantity = results[0][1] + int(num_entry.get())
+                total_value = current_total_value + new_total_value
+                new_cost = total_value / total_quantity
+                save_changes("Products", "cost", new_cost, "name", combo.get())
+                save_changes("Products", "purchase", total_quantity, "name", \
+                             combo.get())
+                num_entry.delete(0, tk.END)
+                combo.delete(0, tk.END)
+                cost_entry.delete(0, tk.END)
+                messagebox.showinfo("success", "successfully updated database")
+        else:
+            messagebox.showerror("error", "cost has to be a positive number")
+    else:
+        messagebox.showerror("error", "Number of products has to be a number "
+                             "and or product has to be selected")
+
+def product_purchase(frame):
+    """All the buttons and labels for product purchase in mang_frame"""
+    global combo, options
+    show_frame(None, frame, "no")
+
+    # labels
+    select_label = tk.Label(frame, text="Select product", 
+                            font=('Arial', 20,"bold"), bg=BG_COLOR)
+    select_label.place(x=620, y=150)
+    amount_label = tk.Label(frame, text="Amount \npurchased", 
+                            font=('Arial', 20,"bold"), bg=BG_COLOR)
+    amount_label.place(x=60, y=80)
+    cost_label = tk.Label(frame, text="Cost", 
+                          font=('Arial', 20,"bold"), bg=BG_COLOR)
+    cost_label.place(x=80, y=200)
+
+    # entries
+    num_entry = tk.Entry(frame, font=('Arial', 15,"bold"), bg=BUTTONS)
+    num_entry.place(x=300, y=100, height=40)
+    cost_entry = tk.Entry(frame, font=('Arial', 15,"bold"), bg=BUTTONS)
+    cost_entry.place(x=300, y=200, height=40)
+
+    options = combo_data()
+
+    # create the combo box
+    combo = ttk.Combobox(frame, values=options, font=('Arial', 15))
+    combo.place(x=600, y=200, height=40)
+
+    # Bind key release to the search function
+    combo.bind('<KeyRelease>', on_type)
+
+    # buttons
+    save_changes =  tk.Button(frame, text="Save changes", cursor="hand2", 
+                              font=('Arial', 17,"bold"), bg=BUTTONS, width=19,
+                              height=3, highlightcolor=BLACK, bd=1, 
+                              relief="solid", command=lambda: purchase
+                              (num_entry, combo, options, 
+                               cost_entry))
+    save_changes.place(x=590, y=25)
+
 def stock_sold(frame):
     """All the buttons and labels for stock sold in mang_frame"""
-    show_frame(frame, frame, "no")
+    global combo, options
+    show_frame(None, frame, "no")
 
     # labels
     Select_label = tk.Label(frame, text="Select product", 
-                          font=('Arial', 20,"bold"), bg=BG_COLOR) 
-    Select_label.place(x=300, y=50)
+                            font=('Arial', 20,"bold"), bg=BG_COLOR)
+    Select_label.place(x=320, y=50)
     amount_label = tk.Label(frame, text="Amount sold", 
-                            font=('Arial', 20,"bold"), bg=BG_COLOR) 
+                            font=('Arial', 20,"bold"), bg=BG_COLOR)
     amount_label.place(x=60, y=50)
 
     # entries
@@ -155,7 +241,8 @@ def inventory_management(frame):
     sold.place(x=5, y=15)
     purchase = tk.Button(page_frame, text="Stock purchase", cursor="hand2", 
                          font=('Arial', 17,"bold"), bg=LABEL_COLOR, width=13, 
-                         height=4, highlightcolor=BLACK, bd=1, relief="solid")
+                         height=4, highlightcolor=BLACK, bd=1, relief="solid",
+                         command=lambda: product_purchase(purchase_frame))
     purchase.place(x=210, y=15)
     remove = tk.Button(page_frame, text="Remove a \nproduct", cursor="hand2", 
                        font=('Arial', 17,"bold"), bg=LABEL_COLOR, width=13, 
@@ -167,21 +254,6 @@ def inventory_management(frame):
     add.place(x=630, y=15)
 
 # inventory count
-def on_type(event):
-    """sorts the data in options"""
-    global combo, options
-    # Get current text from the combobox
-    typed_text = combo.get()
-    
-    if typed_text == '':
-        # Reset to full list if search is empty
-        combo['values'] = options
-    else:
-        # Filter list based on typed characters (case-insensitive)
-        filtered_data = [item for item in options if typed_text.lower() in 
-                         item.lower()]
-        combo['values'] = filtered_data
-
 def make_report():
     """get all the info from the database and add that info to the report"""
     global staff_name, inventory_list
@@ -345,7 +417,6 @@ def check_login(username_entry, password_entry, window):
             login = True
         else:
             messagebox.showerror("Login", "Invalid username or password.")
-            username_entry.delete(0, tk.END)
             password_entry.delete(0, tk.END)
 
 def sign_in():
@@ -421,5 +492,4 @@ while __name__ == "__main__":
     """run the program"""
     # start the login process
     main_window()
-    
     break
