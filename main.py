@@ -75,7 +75,7 @@ def validate(num_entry, combo, options, where):
             messagebox.showinfo("success", "successfully updated database")
     else:
         messagebox.showerror("error", "Number of products has to be a number "
-        "and or product has to be selected")
+                             "and or product has to be selected")
 
 def combo_data():
     """Get the data for the combo box from the database"""
@@ -113,6 +113,44 @@ def manage_users(frame):
     pass
 
 # inventory management
+def remove(combo, options):
+    """validate the entries and update the database"""
+        # validate entries
+    if combo in options:
+        yes_no = messagebox.askyesno("warning", "This action can NOT be "
+                                     "undone are you sure?")
+        if yes_no == True:
+            with sqlite3.connect(DATABASE) as d_b:
+                cursor = d_b.cursor()
+                qrl = f"""DELETE FROM Products WHERE name = "{combo}";"""
+                cursor.execute(qrl)
+            messagebox.showinfo("success", "successfully updated database")
+    else:
+        messagebox.showerror("error", "product has to be in options")
+
+def remove_product(frame):
+    """All the buttons and labels for remove product in mang_frame"""
+    global combo, options
+    show_frame(None, frame, "no")
+    
+    # combo box data
+    options = combo_data()
+
+    # create the combo box
+    combo = ttk.Combobox(frame, values=options, font=('Arial', 15))
+    combo.place(x=600, y=200, height=40)
+
+    # Bind key release to the search function
+    combo.bind('<KeyRelease>', on_type)
+
+    # buttons
+    update =  tk.Button(frame, text="remove product", cursor="hand2", 
+                              font=('Arial', 17,"bold"), bg=BUTTONS, width=19,
+                              height=3, highlightcolor=BLACK, bd=1, 
+                              relief="solid", command=lambda: remove
+                              (combo.get(), options))
+    update.place(x=590, y=25)
+
 def purchase(num_entry, combo, options, cost_entry):
     """validate the entries and get the data need to update the database"""
     # validate entries
@@ -132,7 +170,7 @@ def purchase(num_entry, combo, options, cost_entry):
                 new_cost = total_value / total_quantity
                 save_changes("Products", "cost", new_cost, "name", combo.get())
                 save_changes("Products", "purchase", total_quantity, "name", \
-                             combo.get())
+                    combo.get())
                 num_entry.delete(0, tk.END)
                 combo.delete(0, tk.END)
                 cost_entry.delete(0, tk.END)
@@ -165,6 +203,7 @@ def product_purchase(frame):
     cost_entry = tk.Entry(frame, font=('Arial', 15,"bold"), bg=BUTTONS)
     cost_entry.place(x=300, y=200, height=40)
 
+    # combo box data
     options = combo_data()
 
     # create the combo box
@@ -200,6 +239,7 @@ def stock_sold(frame):
     num_entry = tk.Entry(frame, font=('Arial', 15,"bold"), bg=BUTTONS)
     num_entry.place(x=40, y=150, height=40)
 
+    # combo box data
     options = combo_data()
 
     # create the combo box
@@ -246,7 +286,8 @@ def inventory_management(frame):
     purchase.place(x=210, y=15)
     remove = tk.Button(page_frame, text="Remove a \nproduct", cursor="hand2", 
                        font=('Arial', 17,"bold"), bg=LABEL_COLOR, width=13, 
-                       height=4, highlightcolor=BLACK, bd=1, relief="solid")
+                       height=4, highlightcolor=BLACK, bd=1, relief="solid",
+                       command=lambda: remove_product(remove_frame))
     remove.place(x=420, y=15)
     add = tk.Button(page_frame, text="add a product", cursor="hand2", 
                     font=('Arial', 17,"bold"), bg=LABEL_COLOR, width=13, 
@@ -291,6 +332,7 @@ def inventory_count(frame):
     num_entry = tk.Entry(frame, font=('Arial', 15,"bold"), bg=BUTTONS)
     num_entry.place(x=310, y=150, height=40)
     
+    # combo box data
     options = combo_data()
 
     # create the combo box
@@ -492,4 +534,5 @@ while __name__ == "__main__":
     """run the program"""
     # start the login process
     main_window()
+    
     break
