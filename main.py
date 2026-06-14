@@ -113,6 +113,105 @@ def manage_users(frame):
     pass
 
 # inventory management
+def add(barcode, name, type, cost, amount, display):
+    """validate the entries and update the database"""
+
+    # see is barcode is already in the database
+    with sqlite3.connect(DATABASE) as d_b:
+        cursor = d_b.cursor()
+        qrl = f"""SELECT barcode FROM products WHERE barcode = 
+        "{barcode.get()}";"""
+        cursor.execute(qrl)
+        results = cursor.fetchall()
+        if results == []:
+            ask = True
+        else:
+            # ask if the user wishes to change the current entry
+            ask = messagebox.askyesno("Warning", "This barcode already " \
+            "exists do you want to override this entry")
+            if ask == True:
+                with sqlite3.connect(DATABASE) as d_b:
+                    cursor = d_b.cursor()
+                    qrl = f"""DELETE FROM Products WHERE barcode = 
+                    "{barcode.get()}";"""
+                    cursor.execute(qrl)
+    
+    # see if any of the entries are empty
+    if name.get() == "" or type.get() == "" or display.get() == "":
+        messagebox.showerror("error", "Entries can not be blank")
+    else:
+        try:
+            # see if any of the barcode, cost, and amount are numbers
+            if ask == True and barcode.get().isdigit() and float(cost.get()) \
+                and amount.get().isdigit():
+                # create a new entry and delete the entries
+                with sqlite3.connect(DATABASE) as d_b:
+                    cursor = d_b.cursor()
+                    qrl = f"""INSERT INTO products (barcode, name, type, cost, 
+                    amount, display_name) VALUES ({barcode.get()}, 
+                    "{name.get()}", "{type.get()}", {cost.get()}, 
+                    {amount.get()}, "{display.get()}");"""
+                    cursor.execute(qrl)
+                # reset the entries
+                barcode.delete(0, tk.END)
+                name.delete(0, tk.END)
+                type.delete(0, tk.END)
+                cost.delete(0, tk.END)
+                amount.delete(0, tk.END)
+                display.delete(0, tk.END)
+            else:
+                if ask == True:
+                    messagebox.showerror("error", "Barcode and or amount " \
+                                         "have to be numbers or Entries can " \
+                                         "not be blank")
+        except Exception as e:
+            messagebox.showerror("error", f"cost has to be a number")
+
+def add_product(frame):
+    """All the buttons and labels for adding a product in mang_frame"""
+    
+    # labels
+    barcode_label = tk.Label(frame, text="Barcode",
+                            font=('Arial', 12,"bold"), bg=BG_COLOR)
+    barcode_label.place(x=20, y=23)
+    name_label = tk.Label(frame, text="Name", font=('Arial', 12,"bold"),
+                          bg=BG_COLOR)
+    name_label.place(x=25, y=123)
+    type_label = tk.Label(frame, text="Type", font=('Arial', 12,"bold"),
+                          bg=BG_COLOR)
+    type_label.place(x=25, y=223)
+    cost_label = tk.Label(frame, text="Cost", font=('Arial', 12,"bold"),
+                          bg=BG_COLOR)
+    cost_label.place(x=380, y=23)
+    amount_label = tk.Label(frame, text="Amount", font=('Arial', 12,"bold"),
+                            bg=BG_COLOR)
+    amount_label.place(x=370, y=123)
+    display_label = tk.Label(frame, text="display\nname", 
+                             font=('Arial', 12,"bold"),bg=BG_COLOR)
+    display_label.place(x=370, y=223)
+
+    # entries
+    barcode_entry = tk.Entry(frame, font=('Arial', 15,"bold"), bg=BUTTONS)
+    barcode_entry.place(x=110, y=20, height=40)
+    name_entry = tk.Entry(frame, font=('Arial', 15,"bold"), bg=BUTTONS)
+    name_entry.place(x=110, y=120, height=40)
+    type_entry = tk.Entry(frame, font=('Arial', 15,"bold"), bg=BUTTONS)
+    type_entry.place(x=110, y=220, height=40)
+    cost_entry = tk.Entry(frame, font=('Arial', 15,"bold"), bg=BUTTONS)
+    cost_entry.place(x=470, y=20, height=40)
+    amount_entry = tk.Entry(frame, font=('Arial', 15,"bold"), bg=BUTTONS)
+    amount_entry.place(x=470, y=120, height=40)
+    display_entry = tk.Entry(frame, font=('Arial', 15,"bold"), bg=BUTTONS)
+    display_entry.place(x=470, y=220, height=40)
+
+    # buttons
+    update =  tk.Button(frame, text="Save\nchanges", cursor="hand2",
+                        font=('Arial', 15,"bold"), bg=BUTTONS, width=12,
+                        height=2, highlightcolor=BLACK, bd=1, relief="solid",
+                        command=lambda: add(barcode_entry, name_entry, 
+                        type_entry, cost_entry, amount_entry, display_entry))
+    update.place(x=710, y=210)
+
 def remove(combo, options):
     """validate the entries and update the database"""
         # validate entries
@@ -138,18 +237,17 @@ def remove_product(frame):
 
     # create the combo box
     combo = ttk.Combobox(frame, values=options, font=('Arial', 15))
-    combo.place(x=600, y=200, height=40)
+    combo.place(x=300, y=200, height=40)
 
     # Bind key release to the search function
     combo.bind('<KeyRelease>', on_type)
 
     # buttons
-    update =  tk.Button(frame, text="remove product", cursor="hand2", 
-                              font=('Arial', 17,"bold"), bg=BUTTONS, width=19,
-                              height=3, highlightcolor=BLACK, bd=1, 
-                              relief="solid", command=lambda: remove
-                              (combo.get(), options))
-    update.place(x=590, y=25)
+    update =  tk.Button(frame, text="remove product", cursor="hand2",
+                        font=('Arial', 17,"bold"), bg=BUTTONS, width=19,
+                        height=3, highlightcolor=BLACK, bd=1, relief="solid",
+                        command=lambda: remove(combo.get(), options))
+    update.place(x=290, y=25)
 
 def purchase(num_entry, combo, options, cost_entry):
     """validate the entries and get the data need to update the database"""
@@ -165,7 +263,7 @@ def purchase(num_entry, combo, options, cost_entry):
                 results = cursor.fetchall()
                 current_total_value = results[0][1] * results[0][0]
                 new_total_value = int(num_entry.get()) * float(cost_entry.get())
-                total_quantity = results[0][1] + int(num_entry.get())
+                total_quantity = results[0][2] + int(num_entry.get())
                 total_value = current_total_value + new_total_value
                 new_cost = total_value / total_quantity
                 save_changes("Products", "cost", new_cost, "name", combo.get())
@@ -272,6 +370,7 @@ def inventory_management(frame):
     remove_frame.place(x=0, y=180, width=870, height=300)
     add_frame = tk.Frame(master=frame, bg=BG_COLOR)
     add_frame.place(x=0, y=180, width=870, height=300)
+    add_product(add_frame)
 
     # page buttons for page selector
     sold = tk.Button(page_frame, text="Stock Sold", cursor="hand2", 
@@ -291,7 +390,8 @@ def inventory_management(frame):
     remove.place(x=420, y=15)
     add = tk.Button(page_frame, text="add a product", cursor="hand2", 
                     font=('Arial', 17,"bold"), bg=LABEL_COLOR, width=13, 
-                    height=4, highlightcolor=BLACK, bd=1, relief="solid")
+                    height=4, highlightcolor=BLACK, bd=1, relief="solid",
+                    command=lambda: show_frame(None, add_frame, "no"))
     add.place(x=630, y=15)
 
 # inventory count
@@ -306,10 +406,10 @@ def make_report():
         results = cursor.fetchall()
         # put the results into the products .py function
         for x in range(0, len(results)):
-            product = products.products(results[x][0], results[x][1], 
-                                        results[x][2], results[x][3], 
-                                        results[x][4], results[x][5])
-            product.stock_sold(results[x][8])
+            product = products.products(results[x][0], results[x][8], 
+                                        results[x][2], results[x][2], 
+                                        results[x][3], results[x][4])
+            product.stock_sold(results[x][5])
             product.inventory_count(results[x][7])
             product.stock_purchase(results[x][6])
             # put the item in the list
@@ -394,9 +494,9 @@ def main_window():
                                                      "manage users"))
         users.place(x=5, y=15)
         mang = tk.Button(win_frame, text="Inventory management", cursor="hand2", 
-                          font=('Arial', 17,"bold"), bg=LABEL_COLOR, width=19, 
-                          height=3, highlightcolor=BLACK, bd=1, relief="solid", 
-                          command=lambda: permissions(window_main, mang_frame, 
+                         font=('Arial', 17,"bold"), bg=LABEL_COLOR, width=19, 
+                         height=3, highlightcolor=BLACK, bd=1, relief="solid", 
+                         command=lambda: permissions(window_main, mang_frame, 
                                                      "Inventory management"))
         mang.place(x=300, y=15)
         count = tk.Button(win_frame, text="Inventory count", cursor="hand2", 
@@ -443,8 +543,8 @@ def check_login(username_entry, password_entry, window):
         cursor.execute(qrl)
         results = cursor.fetchall()
         if not results == []:
-            messagebox.showinfo("Login", 
-                                f"Login successful! \n Welcome {results[0][0]}")
+            messagebox.showinfo("Login", "Login successful! \n Welcome "
+                                f"{results[0][0]}")
             staff_name = results[0][0]
 
             # get the position from the database
@@ -479,18 +579,21 @@ def sign_in():
         frame.place(x=200, y=75, width=600, height=500)
 
         # text
-        text = tk.Label(frame, text="login", font=('Arial',25,"bold"), bg=WHITE)
+        text = tk.Label(frame, text="login", font=('Arial',25,"bold"), 
+                        bg=WHITE)
         text.place(x=250, y=15)
         
         # Create the login fields
         username_label = tk.Label(frame, text="Username", 
                                   font=('Arial',15,"bold"), bg=WHITE) 
         username_entry = tk.Entry(frame, width=75, bg=BG_COLOR, relief="flat", 
-                                  highlightbackground=BLACK, highlightthickness=1)
+                                  highlightbackground=BLACK, 
+                                  highlightthickness=1)
         password_label = tk.Label(frame, text="Password", 
                                   font=('Arial',15,"bold"), bg=WHITE)
-        password_entry = tk.Entry(frame, show=is_visible, width=75, bg=BG_COLOR, 
-                                  relief="flat", highlightbackground=BLACK, 
+        password_entry = tk.Entry(frame, show=is_visible, width=75, 
+                                  bg=BG_COLOR, relief="flat", 
+                                  highlightbackground=BLACK, 
                                   highlightthickness=1)
         username_entry.place(x=25, y=130)
         username_label.place(x=50, y=100)
@@ -498,11 +601,12 @@ def sign_in():
         password_label.place(x=50, y=200)
 
         # show password button
-        show_password_b = tk.Button(frame, text=Show_Password_txt, cursor="hand2", 
-                                  font=('Arial', 12), bg=LABEL_COLOR, 
-                                  highlightcolor=BLACK, bd=1, relief="solid", 
-                                  command=lambda password_entry=password_entry: 
-                                  show_password(password_entry))
+        show_password_b = tk.Button(frame, text=Show_Password_txt, 
+                                    cursor="hand2", font=('Arial', 12), 
+                                    bg=LABEL_COLOR, highlightcolor=BLACK, 
+                                    bd=1, relief="solid", command=lambda 
+                                    password_entry=password_entry: 
+                                    show_password(password_entry))
         show_password_b.place(x=350, y=300)
 
         # Create the login button
