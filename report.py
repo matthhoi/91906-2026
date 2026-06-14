@@ -39,11 +39,11 @@ def report(inventory_list, staff_name):
             inv_value += (item[6])*item[5]
             total_sold += item[3]
             total_sales += (item[3])*item[5]
-            item_name = item[1][:25]  # Truncate name if too long
-            report.write(f"{item[0]:<15} {item_name:<20} {'':<2} {item[2]:<10}"
-                         f" {item[4]:<10} {(item[2]+item[4]):<10} "
-                         f"{item[3]:<10} {item[6]:<8} "
-                         f"{(item[2]+item[4]-item[3]-item[6])}\n")
+            item_name = item[1][:23]  # Truncate name if too long
+            report.write(f"{item[0]:<15} {item_name:<23} {item[2]:<10}"
+                         f" {item[3]:<10} {(item[2]+item[3]):<10} "
+                         f"{item[6]:<10} {item[4]:<8} "
+                         f"{((item[2]+item[3])-item[4]-item[6])}\n")
 
         report.write("-" * 100 + "\n")
 
