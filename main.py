@@ -17,6 +17,7 @@ BG_COLOR = "#cccccc"
 LABEL_COLOR = "#efefef"
 WHITE = "#ffffff"
 BLACK = "#000000"
+PERMISSIONS = ["Admin", "Manager", "User"]
 
 # global variables
 exit = False
@@ -92,6 +93,21 @@ def combo_data():
         options.append(results[x][0])
     return options
 
+def user_names():
+    """Get the data for the combo box from the database"""
+        # connect with the database and get data
+    with sqlite3.connect(DATABASE) as d_b:
+        cursor = d_b.cursor()
+        qrl = f"""SELECT name from staff;"""
+        cursor.execute(qrl)
+        results = cursor.fetchall()
+
+    # get the data into options
+    options = []
+    for x in range(0, len(results)):
+        options.append(results[x][0])
+    return options
+
 def on_type(event, combo, options):
     """sorts the data in options"""
     # Get current text from the combobox
@@ -145,6 +161,46 @@ def manage_users(frame):
                          command=lambda: show_frame
                          (None, add_user_frame, "no"))
     add_user.place(x=600, y=15)
+
+def validate_permissions(user_combo, options, permission_combo):
+    """validate the entries from change permissions and update the database"""
+
+def change_permissions(frame):
+    """"All the buttons and labels changing the permissions of a user in 
+    user_frame"""
+    
+    # labels
+    Select_label = tk.Label(frame, text="Select user", 
+                            font=('Arial', 20,"bold"), bg=BG_COLOR)
+    Select_label.place(x=340, y=70)
+    permissions_label = tk.Label(frame, text="New\npermissions", 
+                                 font=('Arial', 20,"bold"), bg=BG_COLOR)
+    permissions_label.place(x=40, y=50)
+
+    # combo box data
+    options = user_names()
+
+    # create the combo box
+    user_combo = ttk.Combobox(frame, values=options, font=('Arial', 15))
+    user_combo.place(x=300, y=150, height=40)
+
+    # Bind key release to the search function
+    user_combo.bind('<KeyRelease>', lambda event: on_type(event, user_combo, 
+                                                          options))
+    
+    # create the combo box
+    permission_combo = ttk.Combobox(frame, values=PERMISSIONS, font=
+                                    ('Arial', 15))
+    permission_combo.place(x=10, y=150, height=40)
+
+    # buttons
+    Save_changes =  tk.Button(frame, text="Save changes", cursor="hand2", 
+                              font=('Arial', 17,"bold"), bg=BUTTONS, width=19,
+                              height=3, highlightcolor=BLACK, bd=1, 
+                              relief="solid", command=lambda: 
+                              validate_permissions(user_combo, options, 
+                                                   permission_combo))
+    Save_changes.place(x=590, y=25)
 
 # inventory management
 def add(barcode, name, type, cost, amount, display):
