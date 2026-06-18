@@ -92,9 +92,8 @@ def combo_data():
         options.append(results[x][0])
     return options
 
-def on_type(event):
+def on_type(event, combo, options):
     """sorts the data in options"""
-    global combo, options
     # Get current text from the combobox
     typed_text = combo.get()
     
@@ -229,8 +228,6 @@ def remove(combo, options):
 
 def remove_product(frame):
     """All the buttons and labels for remove product in mang_frame"""
-    global combo, options
-    show_frame(None, frame, "no")
     
     # combo box data
     options = combo_data()
@@ -240,7 +237,7 @@ def remove_product(frame):
     combo.place(x=300, y=200, height=40)
 
     # Bind key release to the search function
-    combo.bind('<KeyRelease>', on_type)
+    combo.bind('<KeyRelease>', lambda event: on_type(event, combo, options))
 
     # buttons
     update =  tk.Button(frame, text="remove product", cursor="hand2",
@@ -281,8 +278,6 @@ def purchase(num_entry, combo, options, cost_entry):
 
 def product_purchase(frame):
     """All the buttons and labels for product purchase in mang_frame"""
-    global combo, options
-    show_frame(None, frame, "no")
 
     # labels
     select_label = tk.Label(frame, text="Select product", 
@@ -309,7 +304,7 @@ def product_purchase(frame):
     combo.place(x=600, y=200, height=40)
 
     # Bind key release to the search function
-    combo.bind('<KeyRelease>', on_type)
+    combo.bind('<KeyRelease>', lambda event: on_type(event, combo, options))
 
     # buttons
     save_changes =  tk.Button(frame, text="Save changes", cursor="hand2", 
@@ -322,8 +317,6 @@ def product_purchase(frame):
 
 def stock_sold(frame):
     """All the buttons and labels for stock sold in mang_frame"""
-    global combo, options
-    show_frame(None, frame, "no")
 
     # labels
     Select_label = tk.Label(frame, text="Select product", 
@@ -345,7 +338,7 @@ def stock_sold(frame):
     combo.place(x=300, y=150, height=40)
 
     # Bind key release to the search function
-    combo.bind('<KeyRelease>', on_type)
+    combo.bind('<KeyRelease>', lambda event: on_type(event, combo, options))
 
     # buttons
     Save_changes =  tk.Button(frame, text="Save changes", cursor="hand2", 
@@ -364,10 +357,13 @@ def inventory_management(frame):
     # frames
     sold_frame = tk.Frame(master=frame, bg=BG_COLOR)
     sold_frame.place(x=0, y=180, width=870, height=300)
+    stock_sold(sold_frame)
     purchase_frame = tk.Frame(master=frame, bg=BG_COLOR)
     purchase_frame.place(x=0, y=180, width=870, height=300)
+    product_purchase(purchase_frame)
     remove_frame = tk.Frame(master=frame, bg=BG_COLOR)
     remove_frame.place(x=0, y=180, width=870, height=300)
+    remove_product(remove_frame)
     add_frame = tk.Frame(master=frame, bg=BG_COLOR)
     add_frame.place(x=0, y=180, width=870, height=300)
     add_product(add_frame)
@@ -376,17 +372,17 @@ def inventory_management(frame):
     sold = tk.Button(page_frame, text="Stock Sold", cursor="hand2", 
                      font=('Arial', 17,"bold"), bg=LABEL_COLOR, width=13, 
                      height=4, highlightcolor=BLACK, bd=1, relief="solid", 
-                     command=lambda: stock_sold(sold_frame))
+                     command=lambda: show_frame(None, sold_frame, "no"))
     sold.place(x=5, y=15)
     purchase = tk.Button(page_frame, text="Stock purchase", cursor="hand2", 
                          font=('Arial', 17,"bold"), bg=LABEL_COLOR, width=13, 
                          height=4, highlightcolor=BLACK, bd=1, relief="solid",
-                         command=lambda: product_purchase(purchase_frame))
+                         command=lambda: show_frame(None, purchase_frame, "no"))
     purchase.place(x=210, y=15)
     remove = tk.Button(page_frame, text="Remove a \nproduct", cursor="hand2", 
                        font=('Arial', 17,"bold"), bg=LABEL_COLOR, width=13, 
                        height=4, highlightcolor=BLACK, bd=1, relief="solid",
-                       command=lambda: remove_product(remove_frame))
+                       command=lambda: show_frame(None, remove_frame, "no"))
     remove.place(x=420, y=15)
     add = tk.Button(page_frame, text="add a product", cursor="hand2", 
                     font=('Arial', 17,"bold"), bg=LABEL_COLOR, width=13, 
@@ -419,7 +415,6 @@ def make_report():
 
 def inventory_count(frame):
     """All the buttons and labels for the count_frame"""
-    global combo, options
     # labels
     Select_label = tk.Label(frame, text="Select product", 
                           font=('Arial', 20,"bold"), bg=BG_COLOR) 
@@ -440,7 +435,7 @@ def inventory_count(frame):
     combo.place(x=30, y=150, height=40)
 
     # Bind key release to the search function
-    combo.bind('<KeyRelease>', on_type)
+    combo.bind('<KeyRelease>', lambda event: on_type(event, combo, options))
     # buttons
     gen_report =  tk.Button(frame, text="Generate report", cursor="hand2", 
                             font=('Arial', 17,"bold"), bg=BUTTONS, width=19,
