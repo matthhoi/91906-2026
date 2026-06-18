@@ -109,7 +109,42 @@ def on_type(event, combo, options):
 # manage users
 def manage_users(frame):
     """All the buttons and labels for the users_frame"""
-    pass
+        # page selector frame
+    page_frame = tk.Frame(master=frame, bg=WHITE)
+    page_frame.place(x=20, y=15, width=825, height=150)
+    
+    # frames
+    permissions_frame = tk.Frame(master=frame, bg=BG_COLOR)
+    permissions_frame.place(x=0, y=180, width=870, height=300)
+    change_permissions(permissions_frame)
+    password_frame = tk.Frame(master=frame, bg=BG_COLOR)
+    password_frame.place(x=0, y=180, width=870, height=300)
+    (password_frame)
+    add_user_frame = tk.Frame(master=frame, bg=BG_COLOR)
+    add_user_frame.place(x=0, y=180, width=870, height=300)
+    (add_user_frame)
+
+    # page buttons for page selector
+    permissions = tk.Button(page_frame, text="Change\npermissions",
+                            cursor="hand2", font=('Arial', 17,"bold"),
+                            bg=LABEL_COLOR, width=15, height=4,
+                            highlightcolor=BLACK, bd=1, relief="solid",
+                            command=lambda: show_frame
+                            (None, permissions_frame, "no"))
+    permissions.place(x=5, y=15)
+    password = tk.Button(page_frame, text="Change\npassword", cursor="hand2",
+                         font=('Arial', 17,"bold"), bg=LABEL_COLOR, width=15,
+                         height=4, highlightcolor=BLACK, bd=1, relief="solid",
+                         command=lambda: show_frame
+                         (None, password_frame, "no"))
+    password.place(x=300, y=15)
+    add_user = tk.Button(page_frame, text="Create/Remove\nuser", 
+                         cursor="hand2", font=('Arial', 17,"bold"),
+                         bg=LABEL_COLOR, width=15, height=4,
+                         highlightcolor=BLACK, bd=1, relief="solid",
+                         command=lambda: show_frame
+                         (None, add_user_frame, "no"))
+    add_user.place(x=600, y=15)
 
 # inventory management
 def add(barcode, name, type, cost, amount, display):
