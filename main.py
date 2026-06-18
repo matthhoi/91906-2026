@@ -164,6 +164,14 @@ def manage_users(frame):
 
 def validate_permissions(user_combo, options, permission_combo):
     """validate the entries from change permissions and update the database"""
+    # validate entries
+    if user_combo.get() in options and permission_combo.get() in PERMISSIONS:
+        save_changes("staff", "permissions", permission_combo.get(), "name", 
+        user_combo.get())
+        messagebox.showinfo("success", "successfully updated database")
+    else:
+        messagebox.showerror("error", "name or new permissions has to be in " \
+                             "options")
 
 def change_permissions(frame):
     """"All the buttons and labels changing the permissions of a user in 
