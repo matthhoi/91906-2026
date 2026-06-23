@@ -64,19 +64,26 @@ def permissions(window_main, frame, button):
             messagebox.showerror("Error", "You don't have the correct "
                                  "permissions")
 
-def validate(num_entry, combo, options, where):
+def validate(event, num_entry, combo, options, where):
     """validate the entries"""
     # validate entries
-    if num_entry.isdigit() and combo in options:
-        if where == 1:
-            save_changes("Products", "count", num_entry, "name", combo)
-            messagebox.showinfo("success", "successfully updated database")
-        elif where == 2:
-            save_changes("Products", "sold", num_entry, "name", combo)
-            messagebox.showinfo("success", "successfully updated database")
-    else:
-        messagebox.showerror("error", "Number of products has to be a number "
-                             "and or product has to be selected")
+    try:
+        if num_entry.get().isdigit() and combo.get() in options:
+            if where == 1:
+                save_changes("Products", "count", num_entry.get(), "name",
+                combo.get())
+                messagebox.showinfo("success", "successfully updated database")
+            elif where == 2:
+                save_changes("Products", "sold", num_entry.get(), "name",
+                combo.get())
+                messagebox.showinfo("success", "successfully updated database")
+            num_entry.delete(0, tk.END)
+            combo.delete(0, tk.END)
+        else:
+            messagebox.showerror("error", "Number of products has to be a "
+            "number and or product has to be selected")
+    except:
+        messagebox.showerror("error", f"cost has to be a number")
 
 def combo_data():
     """Get the data for the combo box from the database"""
@@ -162,7 +169,7 @@ def manage_users(frame):
                          (None, add_user_frame, "no"))
     add_user.place(x=600, y=15)
 
-def validate_permissions(user_combo, options, permission_combo):
+def validate_permissions(event, user_combo, options, permission_combo):
     """validate the entries from change permissions and update the database"""
     # validate entries
     if user_combo.get() in options and permission_combo.get() in PERMISSIONS:
@@ -201,17 +208,22 @@ def change_permissions(frame):
                                     ('Arial', 15))
     permission_combo.place(x=10, y=150, height=40)
 
+    user_combo.bind('<Return>', lambda event: validate_permissions(event,
+                    user_combo, options, permission_combo))
+    permission_combo.bind('<Return>', lambda event: validate_permissions(event,
+                          user_combo, options, permission_combo))
+
     # buttons
     Save_changes =  tk.Button(frame, text="Save changes", cursor="hand2", 
                               font=('Arial', 17,"bold"), bg=BUTTONS, width=19,
                               height=3, highlightcolor=BLACK, bd=1, 
-                              relief="solid", command=lambda: 
-                              validate_permissions(user_combo, options, 
+                              relief="solid", command=lambda event: 
+                              validate_permissions(event, user_combo, options, 
                                                    permission_combo))
     Save_changes.place(x=590, y=25)
 
 # inventory management
-def add(barcode, name, type, cost, amount, display):
+def add(event, barcode, name, type, cost, amount, display):
     """validate the entries and update the database"""
 
     # see is barcode is already in the database
@@ -262,7 +274,7 @@ def add(barcode, name, type, cost, amount, display):
                     messagebox.showerror("error", "Barcode and or amount " \
                                          "have to be numbers or Entries can " \
                                          "not be blank")
-        except Exception as e:
+        except:
             messagebox.showerror("error", f"cost has to be a number")
 
 def add_product(frame):
@@ -302,26 +314,47 @@ def add_product(frame):
     display_entry = tk.Entry(frame, font=('Arial', 15,"bold"), bg=BUTTONS)
     display_entry.place(x=470, y=220, height=40)
 
+    barcode_entry.bind('<Return>', lambda event: add(event, barcode_entry, 
+                       name_entry, type_entry, cost_entry, amount_entry, 
+                       display_entry))
+    name_entry.bind('<Return>', lambda event: add(event, barcode_entry, 
+                       name_entry, type_entry, cost_entry, amount_entry, 
+                       display_entry))
+    type_entry.bind('<Return>', lambda event: add(event, barcode_entry, 
+                       name_entry, type_entry, cost_entry, amount_entry, 
+                       display_entry))
+    cost_entry.bind('<Return>', lambda event: add(event, barcode_entry, 
+                       name_entry, type_entry, cost_entry, amount_entry, 
+                       display_entry))
+    amount_entry.bind('<Return>', lambda event: add(event, barcode_entry, 
+                       name_entry, type_entry, cost_entry, amount_entry, 
+                       display_entry))
+    display_entry.bind('<Return>', lambda event: add(event, barcode_entry, 
+                       name_entry, type_entry, cost_entry, amount_entry, 
+                       display_entry))
+
     # buttons
     update =  tk.Button(frame, text="Save\nchanges", cursor="hand2",
                         font=('Arial', 15,"bold"), bg=BUTTONS, width=12,
                         height=2, highlightcolor=BLACK, bd=1, relief="solid",
-                        command=lambda: add(barcode_entry, name_entry, 
-                        type_entry, cost_entry, amount_entry, display_entry))
+                        command=lambda event: add(event, barcode_entry, 
+                        name_entry, type_entry, cost_entry, amount_entry, 
+                        display_entry))
     update.place(x=710, y=210)
 
-def remove(combo, options):
+def remove(event, combo, options):
     """validate the entries and update the database"""
         # validate entries
-    if combo in options:
+    if combo.get() in options:
         yes_no = messagebox.askyesno("warning", "This action can NOT be "
                                      "undone are you sure?")
         if yes_no == True:
             with sqlite3.connect(DATABASE) as d_b:
                 cursor = d_b.cursor()
-                qrl = f"""DELETE FROM Products WHERE name = "{combo}";"""
+                qrl = f"""DELETE FROM Products WHERE name = "{combo.get()}";"""
                 cursor.execute(qrl)
             messagebox.showinfo("success", "successfully updated database")
+            combo.delete(0, tk.END)
     else:
         messagebox.showerror("error", "product has to be in options")
 
@@ -337,43 +370,51 @@ def remove_product(frame):
 
     # Bind key release to the search function
     combo.bind('<KeyRelease>', lambda event: on_type(event, combo, options))
+    combo.bind('<Return>', lambda event: remove(event, combo, options))
 
     # buttons
     update =  tk.Button(frame, text="remove product", cursor="hand2",
                         font=('Arial', 17,"bold"), bg=BUTTONS, width=19,
                         height=3, highlightcolor=BLACK, bd=1, relief="solid",
-                        command=lambda: remove(combo.get(), options))
+                        command=lambda event: remove(event, combo, options))
     update.place(x=290, y=25)
 
 def purchase(num_entry, combo, options, cost_entry):
     """validate the entries and get the data need to update the database"""
     # validate entries
-    if num_entry.get().isdigit() and combo.get() in options and \
-        float(cost_entry.get()):
-        if float(cost_entry.get()) > 0:
-            with sqlite3.connect(DATABASE) as d_b:
-                cursor = d_b.cursor()
-                qrl = f"""SELECT cost, amount, purchase FROM Products WHERE 
-                name = "{combo.get()}";"""
-                cursor.execute(qrl)
-                results = cursor.fetchall()
-                current_total_value = results[0][1] * results[0][0]
-                new_total_value = int(num_entry.get()) * float(cost_entry.get())
-                total_quantity = results[0][2] + int(num_entry.get())
-                total_value = current_total_value + new_total_value
-                new_cost = total_value / total_quantity
-                save_changes("Products", "cost", new_cost, "name", combo.get())
-                save_changes("Products", "purchase", total_quantity, "name", \
-                    combo.get())
-                num_entry.delete(0, tk.END)
-                combo.delete(0, tk.END)
-                cost_entry.delete(0, tk.END)
-                messagebox.showinfo("success", "successfully updated database")
+    try:
+        if num_entry.get().isdigit() and combo.get() in options and \
+            float(cost_entry.get()):
+            if float(cost_entry.get()) > 0:
+                with sqlite3.connect(DATABASE) as d_b:
+                    cursor = d_b.cursor()
+                    qrl = f"""SELECT cost, amount, purchase FROM Products
+                     WHERE name = "{combo.get()}";"""
+                    cursor.execute(qrl)
+                    results = cursor.fetchall()
+                    current_total_value = results[0][1] * results[0][0]
+                    new_total_value = int(num_entry.get()) * \
+                        float(cost_entry.get())
+                    total_quantity = results[0][2] + int(num_entry.get())
+                    total_value = current_total_value + new_total_value
+                    new_cost = total_value / total_quantity
+                    save_changes("Products", "cost", new_cost, "name", 
+                                 combo.get())
+                    save_changes("Products", "purchase", total_quantity,
+                                 "name", combo.get())
+                    num_entry.delete(0, tk.END)
+                    combo.delete(0, tk.END)
+                    cost_entry.delete(0, tk.END)
+                    messagebox.showinfo("success", "successfully updated "
+                                        "database")
+            else:
+                messagebox.showerror("error", "cost has to be a positive "
+                                     "number")
         else:
-            messagebox.showerror("error", "cost has to be a positive number")
-    else:
-        messagebox.showerror("error", "Number of products has to be a number "
-                             "and or product has to be selected")
+            messagebox.showerror("error", "Number of products has to be a "
+                                 "number and or product has to be selected")
+    except:
+        messagebox.showerror("error", f"cost has to be a number")
 
 def product_purchase(frame):
     """All the buttons and labels for product purchase in mang_frame"""
@@ -404,14 +445,19 @@ def product_purchase(frame):
 
     # Bind key release to the search function
     combo.bind('<KeyRelease>', lambda event: on_type(event, combo, options))
+    combo.bind('<Return>', lambda event: validate(event, num_entry, combo,
+                                                  options, 2))
+    num_entry.bind('<Return>', lambda event: validate(event, num_entry, combo,
+                                                      options, 2))
+    cost_entry.bind('<Return>', lambda event: validate(event, num_entry, combo,
+                                                       options, 2))
 
     # buttons
     save_changes =  tk.Button(frame, text="Save changes", cursor="hand2", 
                               font=('Arial', 17,"bold"), bg=BUTTONS, width=19,
                               height=3, highlightcolor=BLACK, bd=1, 
-                              relief="solid", command=lambda: purchase
-                              (num_entry, combo, options, 
-                               cost_entry))
+                              relief="solid", command=lambda event: purchase
+                              (event ,num_entry, combo, options, cost_entry))
     save_changes.place(x=590, y=25)
 
 def stock_sold(frame):
@@ -438,13 +484,17 @@ def stock_sold(frame):
 
     # Bind key release to the search function
     combo.bind('<KeyRelease>', lambda event: on_type(event, combo, options))
+    combo.bind('<Return>', lambda event: validate(event, num_entry, combo,
+                                                  options, 2))
+    num_entry.bind('<Return>', lambda event: validate(event, num_entry, combo,
+                                                      options, 2))
 
     # buttons
     Save_changes =  tk.Button(frame, text="Save changes", cursor="hand2", 
                               font=('Arial', 17,"bold"), bg=BUTTONS, width=19,
                               height=3, highlightcolor=BLACK, bd=1, 
-                              relief="solid", command=lambda: validate
-                              (num_entry.get(), combo.get(), options, 2))
+                              relief="solid", command=lambda event: validate
+                              (event, num_entry, combo, options, 2))
     Save_changes.place(x=590, y=25)
 
 def inventory_management(frame):
@@ -535,6 +585,11 @@ def inventory_count(frame):
 
     # Bind key release to the search function
     combo.bind('<KeyRelease>', lambda event: on_type(event, combo, options))
+    combo.bind('<Return>', lambda event: validate(event, num_entry, combo,
+                                                  options, 1))
+    num_entry.bind('<Return>', lambda event: validate(event, num_entry, combo,
+                                                      options, 1))
+
     # buttons
     gen_report =  tk.Button(frame, text="Generate report", cursor="hand2", 
                             font=('Arial', 17,"bold"), bg=BUTTONS, width=19,
@@ -544,8 +599,8 @@ def inventory_count(frame):
     Save_changes =  tk.Button(frame, text="Save changes", cursor="hand2", 
                             font=('Arial', 17,"bold"), bg=BUTTONS, width=19,
                             height=3, highlightcolor=BLACK, bd=1, 
-                            relief="solid", command=lambda: validate
-                            (num_entry.get(), combo.get(), options, 1))
+                            relief="solid", command=lambda event: validate
+                            (event, num_entry, combo, options, 1))
     Save_changes.place(x=590, y=25)
 
 # main
@@ -624,7 +679,7 @@ def show_password(password_entry):
         password_entry.config(show=is_visible)
         Show_Password_txt = "Show Password"
 
-def check_login(username_entry, password_entry, window):
+def check_login(event, username_entry, password_entry, window):
     """Check if the username and password are correct"""
     global login, staff_position, staff_name
     # connect to the database
@@ -698,8 +753,7 @@ def sign_in():
         show_password_b = tk.Button(frame, text=Show_Password_txt, 
                                     cursor="hand2", font=('Arial', 12), 
                                     bg=LABEL_COLOR, highlightcolor=BLACK, 
-                                    bd=1, relief="solid", command=lambda 
-                                    password_entry=password_entry: 
+                                    bd=1, relief="solid", command=lambda: 
                                     show_password(password_entry))
         show_password_b.place(x=350, y=300)
 
@@ -707,12 +761,16 @@ def sign_in():
         login_button = tk.Button(frame, text="sign in", cursor="hand2",
                                  font=('Arial', 15,"bold"), bg=LABEL_COLOR, 
                                  highlightcolor=BLACK, bd=1, relief="solid", 
-                                 width=10, height=2, command=lambda 
-                                 username_entry=username_entry, 
-                                 password_entry=password_entry, window=window:
-                                 check_login(username_entry, password_entry, 
-                                             window))
+                                 width=10, height=2, command=lambda event: 
+                                 check_login(event, username_entry, 
+                                 password_entry, window))
         login_button.place(x=225, y=400)
+
+        password_entry.bind('<Return>', lambda event: check_login(event, 
+                            username_entry, password_entry, window))
+        username_entry.bind('<Return>', lambda event: check_login(event, 
+                            username_entry, password_entry, window))
+
         window.mainloop()
 
         if login == False:
