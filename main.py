@@ -130,44 +130,42 @@ def on_type(event, combo, options):
         combo['values'] = filtered_data
 
 # manage users
-def manage_users(frame):
-    """All the buttons and labels for the users_frame"""
-        # page selector frame
-    page_frame = tk.Frame(master=frame, bg=WHITE)
-    page_frame.place(x=20, y=15, width=825, height=150)
-    
-    # frames
-    permissions_frame = tk.Frame(master=frame, bg=BG_COLOR)
-    permissions_frame.place(x=0, y=180, width=870, height=300)
-    change_permissions(permissions_frame)
-    password_frame = tk.Frame(master=frame, bg=BG_COLOR)
-    password_frame.place(x=0, y=180, width=870, height=300)
-    (password_frame)
-    add_user_frame = tk.Frame(master=frame, bg=BG_COLOR)
-    add_user_frame.place(x=0, y=180, width=870, height=300)
-    (add_user_frame)
+def validate_password(event):
+    """validate the entries from change password and update the database"""
 
-    # page buttons for page selector
-    permissions = tk.Button(page_frame, text="Change\npermissions",
-                            cursor="hand2", font=('Arial', 17,"bold"),
-                            bg=LABEL_COLOR, width=15, height=4,
-                            highlightcolor=BLACK, bd=1, relief="solid",
-                            command=lambda: show_frame
-                            (None, permissions_frame, "no"))
-    permissions.place(x=5, y=15)
-    password = tk.Button(page_frame, text="Change\npassword", cursor="hand2",
-                         font=('Arial', 17,"bold"), bg=LABEL_COLOR, width=15,
-                         height=4, highlightcolor=BLACK, bd=1, relief="solid",
-                         command=lambda: show_frame
-                         (None, password_frame, "no"))
-    password.place(x=300, y=15)
-    add_user = tk.Button(page_frame, text="Create/Remove\nuser", 
-                         cursor="hand2", font=('Arial', 17,"bold"),
-                         bg=LABEL_COLOR, width=15, height=4,
-                         highlightcolor=BLACK, bd=1, relief="solid",
-                         command=lambda: show_frame
-                         (None, add_user_frame, "no"))
-    add_user.place(x=600, y=15)
+def change_password(frame):
+    """All the buttons and labels changing the password of a user in 
+    user_frame"""
+    
+    # labels
+    Select_label = tk.Label(frame, text="Select user", 
+                            font=('Arial', 20,"bold"), bg=BG_COLOR)
+    Select_label.place(x=360, y=70)
+    permissions_label = tk.Label(frame, text="password", 
+                                 font=('Arial', 20,"bold"), bg=BG_COLOR)
+    permissions_label.place(x=100, y=70)
+
+    # combo box data
+    options = user_names()
+
+    # create the combo box
+    combo = ttk.Combobox(frame, values=options, font=('Arial', 15))
+    combo.place(x=320, y=150, height=40)
+
+    # entries
+    password_entry = tk.Entry(frame, font=('Arial', 20,"bold"), bg=BUTTONS)
+    password_entry.place(x=10, y=150, height=40)
+
+    # Bind key release to the search function
+    combo.bind('<KeyRelease>', lambda event: on_type(event, combo, options))
+    
+    # buttons
+    Save_changes =  tk.Button(frame, text="Save changes", cursor="hand2", 
+                              font=('Arial', 17,"bold"), bg=BUTTONS, width=16,
+                              height=3, highlightcolor=BLACK, bd=1, 
+                              relief="solid", command=lambda event: 
+                              validate_password(event))
+    Save_changes.place(x=590, y=25)
 
 def validate_permissions(event, user_combo, options, permission_combo):
     """validate the entries from change permissions and update the database"""
@@ -221,6 +219,45 @@ def change_permissions(frame):
                               validate_permissions(event, user_combo, options, 
                                                    permission_combo))
     Save_changes.place(x=590, y=25)
+
+def manage_users(frame):
+    """All the buttons and labels for the users_frame"""
+        # page selector frame
+    page_frame = tk.Frame(master=frame, bg=WHITE)
+    page_frame.place(x=20, y=15, width=825, height=150)
+    
+    # frames
+    permissions_frame = tk.Frame(master=frame, bg=BG_COLOR)
+    permissions_frame.place(x=0, y=180, width=870, height=300)
+    change_permissions(permissions_frame)
+    password_frame = tk.Frame(master=frame, bg=BG_COLOR)
+    password_frame.place(x=0, y=180, width=870, height=300)
+    change_password(password_frame)
+    add_user_frame = tk.Frame(master=frame, bg=BG_COLOR)
+    add_user_frame.place(x=0, y=180, width=870, height=300)
+    (add_user_frame)
+
+    # page buttons for page selector
+    permissions = tk.Button(page_frame, text="Change\npermissions",
+                            cursor="hand2", font=('Arial', 17,"bold"),
+                            bg=LABEL_COLOR, width=15, height=4,
+                            highlightcolor=BLACK, bd=1, relief="solid",
+                            command=lambda: show_frame
+                            (None, permissions_frame, "no"))
+    permissions.place(x=5, y=15)
+    password = tk.Button(page_frame, text="Change\npassword", cursor="hand2",
+                         font=('Arial', 17,"bold"), bg=LABEL_COLOR, width=15,
+                         height=4, highlightcolor=BLACK, bd=1, relief="solid",
+                         command=lambda: show_frame
+                         (None, password_frame, "no"))
+    password.place(x=300, y=15)
+    add_user = tk.Button(page_frame, text="Create/Remove\nuser", 
+                         cursor="hand2", font=('Arial', 17,"bold"),
+                         bg=LABEL_COLOR, width=15, height=4,
+                         highlightcolor=BLACK, bd=1, relief="solid",
+                         command=lambda: show_frame
+                         (None, add_user_frame, "no"))
+    add_user.place(x=600, y=15)
 
 # inventory management
 def add(event, barcode, name, type, cost, amount, display):
