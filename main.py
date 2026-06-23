@@ -24,7 +24,7 @@ exit = False
 login = False
 is_visible = "*"
 Show_Password_txt = "Show Password"
-staff_position = "Admin"
+staff_position = ""
 staff_name = ""
 order_list = []
 total_price = 0.0
@@ -130,8 +130,17 @@ def on_type(event, combo, options):
         combo['values'] = filtered_data
 
 # manage users
-def validate_password(event):
+def validate_password(event, combo, options, password_entry):
     """validate the entries from change password and update the database"""
+    if combo.get() in options and not password_entry.get() == "" :
+        save_changes("staff", "password", password_entry.get(), "name", 
+        combo.get())
+        messagebox.showinfo("success", "successfully updated database")
+        combo.delete(0, tk.END)
+        password_entry.delete(0, tk.END)
+    else:
+        messagebox.showerror("error", "name or new permissions has to be in " \
+                             "options")
 
 def change_password(frame):
     """All the buttons and labels changing the password of a user in 
@@ -158,13 +167,18 @@ def change_password(frame):
 
     # Bind key release to the search function
     combo.bind('<KeyRelease>', lambda event: on_type(event, combo, options))
+    combo.bind('<Return>', lambda event: validate_password(event, combo,
+               options, password_entry))
+    password_entry.bind('<Return>', lambda event: validate_password(event,
+                        combo, options, password_entry))
     
     # buttons
     Save_changes =  tk.Button(frame, text="Save changes", cursor="hand2", 
-                              font=('Arial', 17,"bold"), bg=BUTTONS, width=16,
+                              font=('Arial', 17,"bold"), bg=BUTTONS, width=18,
                               height=3, highlightcolor=BLACK, bd=1, 
-                              relief="solid", command=lambda event: 
-                              validate_password(event))
+                              relief="solid", command=lambda event=None: 
+                              validate_password(event, combo, options, 
+                                                password_entry))
     Save_changes.place(x=590, y=25)
 
 def validate_permissions(event, user_combo, options, permission_combo):
@@ -174,6 +188,8 @@ def validate_permissions(event, user_combo, options, permission_combo):
         save_changes("staff", "permissions", permission_combo.get(), "name", 
         user_combo.get())
         messagebox.showinfo("success", "successfully updated database")
+        user_combo.delete(0, tk.END)
+        permission_combo.delete(0, tk.END)
     else:
         messagebox.showerror("error", "name or new permissions has to be in " \
                              "options")
@@ -215,7 +231,7 @@ def change_permissions(frame):
     Save_changes =  tk.Button(frame, text="Save changes", cursor="hand2", 
                               font=('Arial', 17,"bold"), bg=BUTTONS, width=19,
                               height=3, highlightcolor=BLACK, bd=1, 
-                              relief="solid", command=lambda event: 
+                              relief="solid", command=lambda event=None: 
                               validate_permissions(event, user_combo, options, 
                                                    permission_combo))
     Save_changes.place(x=590, y=25)
@@ -374,7 +390,7 @@ def add_product(frame):
     update =  tk.Button(frame, text="Save\nchanges", cursor="hand2",
                         font=('Arial', 15,"bold"), bg=BUTTONS, width=12,
                         height=2, highlightcolor=BLACK, bd=1, relief="solid",
-                        command=lambda event: add(event, barcode_entry, 
+                        command=lambda event=None: add(event, barcode_entry, 
                         name_entry, type_entry, cost_entry, amount_entry, 
                         display_entry))
     update.place(x=710, y=210)
@@ -413,10 +429,11 @@ def remove_product(frame):
     update =  tk.Button(frame, text="remove product", cursor="hand2",
                         font=('Arial', 17,"bold"), bg=BUTTONS, width=19,
                         height=3, highlightcolor=BLACK, bd=1, relief="solid",
-                        command=lambda event: remove(event, combo, options))
+                        command=lambda event=None: remove(event, combo, 
+                                                          options))
     update.place(x=290, y=25)
 
-def purchase(num_entry, combo, options, cost_entry):
+def purchase(event, num_entry, combo, options, cost_entry):
     """validate the entries and get the data need to update the database"""
     # validate entries
     try:
@@ -493,8 +510,9 @@ def product_purchase(frame):
     save_changes =  tk.Button(frame, text="Save changes", cursor="hand2", 
                               font=('Arial', 17,"bold"), bg=BUTTONS, width=19,
                               height=3, highlightcolor=BLACK, bd=1, 
-                              relief="solid", command=lambda event: purchase
-                              (event ,num_entry, combo, options, cost_entry))
+                              relief="solid", command=lambda event=None: 
+                              purchase(event ,num_entry, combo, options, 
+                                       cost_entry))
     save_changes.place(x=590, y=25)
 
 def stock_sold(frame):
@@ -530,8 +548,8 @@ def stock_sold(frame):
     Save_changes =  tk.Button(frame, text="Save changes", cursor="hand2", 
                               font=('Arial', 17,"bold"), bg=BUTTONS, width=19,
                               height=3, highlightcolor=BLACK, bd=1, 
-                              relief="solid", command=lambda event: validate
-                              (event, num_entry, combo, options, 2))
+                              relief="solid", command=lambda event=None: 
+                              validate(event, num_entry, combo, options, 2))
     Save_changes.place(x=590, y=25)
 
 def inventory_management(frame):
@@ -636,7 +654,7 @@ def inventory_count(frame):
     Save_changes =  tk.Button(frame, text="Save changes", cursor="hand2", 
                             font=('Arial', 17,"bold"), bg=BUTTONS, width=19,
                             height=3, highlightcolor=BLACK, bd=1, 
-                            relief="solid", command=lambda event: validate
+                            relief="solid", command=lambda event=None: validate
                             (event, num_entry, combo, options, 1))
     Save_changes.place(x=590, y=25)
 
@@ -798,7 +816,7 @@ def sign_in():
         login_button = tk.Button(frame, text="sign in", cursor="hand2",
                                  font=('Arial', 15,"bold"), bg=LABEL_COLOR, 
                                  highlightcolor=BLACK, bd=1, relief="solid", 
-                                 width=10, height=2, command=lambda event: 
+                                 width=10, height=2, command=lambda event=None: 
                                  check_login(event, username_entry, 
                                  password_entry, window))
         login_button.place(x=225, y=400)
