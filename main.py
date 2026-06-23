@@ -24,7 +24,7 @@ exit = False
 login = False
 is_visible = "*"
 Show_Password_txt = "Show Password"
-staff_position = ""
+staff_position = "Admin"
 staff_name = ""
 order_list = []
 total_price = 0.0
@@ -130,6 +130,53 @@ def on_type(event, combo, options):
         combo['values'] = filtered_data
 
 # manage users
+def validate_add_user(event):
+    """validate the entries from add user and update the database"""
+
+def validate_remove_user(event, combo, options):
+    """validate the entries from remove user and update the database"""
+    if combo.get() in options:
+        with sqlite3.connect(DATABASE) as d_b:
+            cursor = d_b.cursor()
+            qrl = f"""DELETE FROM Staff WHERE name = "{combo.get()}";"""
+            cursor.execute(qrl)
+        messagebox.showinfo("success", "successfully updated database")
+        combo.delete(0, tk.END)
+    else:
+        messagebox.showerror("error", "name has to be in options")
+
+def add_users(frame):
+    """"All the buttons and labels add/remove a user in user_frame"""
+    # labels
+    Select_label = tk.Label(frame, text="Select user", 
+                            font=('Arial', 20,"bold"), bg=BG_COLOR)
+    Select_label.place(x=80, y=30)
+
+    # combo box data
+    options = user_names()
+
+    # create the combo box
+    combo = ttk.Combobox(frame, values=options, font=('Arial', 15))
+    combo.place(x=40, y=120, height=40)
+
+    # Bind key release to the search function
+    combo.bind('<KeyRelease>', lambda event: on_type(event, combo, options))
+    combo.bind('<Return>', lambda event: validate_remove_user(event))
+
+    # buttons
+    save_changes = tk.Button(frame, text="Save\nchanges", cursor="hand2",
+                             font=('Arial', 15,"bold"), bg=BUTTONS, width=12,
+                             height=2, highlightcolor=BLACK, bd=1,
+                             relief="solid", command=lambda event=None:
+                             validate_add_user(event))
+    save_changes.place(x=710, y=210)
+    remove_user = tk.Button(frame, text="remove user", cursor="hand2",
+                            font=('Arial',18,"bold"), bg=BUTTONS, width=14,
+                            height=2, highlightcolor=BLACK, bd=1,
+                            relief="solid", command=lambda event=None:
+                            validate_remove_user(event))
+    remove_user.place(x=55, y=200)
+
 def validate_password(event, combo, options, password_entry):
     """validate the entries from change password and update the database"""
     if combo.get() in options and not password_entry.get() == "" :
@@ -251,7 +298,7 @@ def manage_users(frame):
     change_password(password_frame)
     add_user_frame = tk.Frame(master=frame, bg=BG_COLOR)
     add_user_frame.place(x=0, y=180, width=870, height=300)
-    (add_user_frame)
+    add_users(add_user_frame)
 
     # page buttons for page selector
     permissions = tk.Button(page_frame, text="Change\npermissions",
