@@ -85,27 +85,12 @@ def validate(event, num_entry, combo, options, where):
     except:
         messagebox.showerror("error", f"cost has to be a number")
 
-def combo_data():
+def combo_data(column, table):
     """Get the data for the combo box from the database"""
     # connect with the database and get data
     with sqlite3.connect(DATABASE) as d_b:
         cursor = d_b.cursor()
-        qrl = f"""SELECT name from products;"""
-        cursor.execute(qrl)
-        results = cursor.fetchall()
-
-    # get the data into options
-    options = []
-    for x in range(0, len(results)):
-        options.append(results[x][0])
-    return options
-
-def user_names():
-    """Get the data for the combo box from the database"""
-        # connect with the database and get data
-    with sqlite3.connect(DATABASE) as d_b:
-        cursor = d_b.cursor()
-        qrl = f"""SELECT name from staff;"""
+        qrl = f"""SELECT {column} from {table};"""
         cursor.execute(qrl)
         results = cursor.fetchall()
 
@@ -130,8 +115,41 @@ def on_type(event, combo, options):
         combo['values'] = filtered_data
 
 # manage users
-def validate_add_user(event):
+def validate_add_user(event, combo, username, password, name):
     """validate the entries from add user and update the database"""
+    # get hightest id
+    with sqlite3.connect(DATABASE) as d_b:
+        cursor = d_b.cursor()
+        # Get the last order ID/no from the database
+        qrl = """SELECT MAX(staff_id) FROM Staff;"""
+        cursor.execute(qrl)
+        result = cursor.fetchall()
+    
+    # create new id
+    if result[0][0] is None:
+        staff_id = 1
+    else:
+        staff_id = result[0][0] + 1
+
+    # cheek the entries
+    if combo.get() in PERMISSIONS and not username.get() == "" and not \
+        password.get() == "" and not name.get() == "":
+        # update the database
+        with sqlite3.connect(DATABASE) as d_b:
+            cursor = d_b.cursor()
+            qrl = f"""INSERT INTO Staff (staff_id, username, password, name, 
+                      permissions) VALUES ({staff_id}, "{username.get()}", 
+                      "{password.get()}", "{name.get()}", 
+                      "{combo.get()}");"""
+            cursor.execute(qrl)
+        messagebox.showinfo("success", "successfully updated database")
+        combo.delete(0, tk.END)
+        username.delete(0, tk.END)
+        password.delete(0, tk.END)
+        name.delete(0, tk.END)
+    else:
+        messagebox.showerror("error", "entries cant be blank or permissions " \
+                             "has to be in options")
 
 def validate_remove_user(event, combo, options):
     """validate the entries from remove user and update the database"""
@@ -145,36 +163,75 @@ def validate_remove_user(event, combo, options):
     else:
         messagebox.showerror("error", "name has to be in options")
 
-def add_users(frame):
+def add_remove_users(frame):
     """"All the buttons and labels add/remove a user in user_frame"""
     # labels
     Select_label = tk.Label(frame, text="Select user", 
                             font=('Arial', 20,"bold"), bg=BG_COLOR)
     Select_label.place(x=80, y=30)
+    username_label = tk.Label(frame, text="username", font=
+                              ('Arial', 15,"bold"), bg=BG_COLOR)
+    username_label.place(x=355, y=20)
+    password_label = tk.Label(frame, text="password", font=
+                              ('Arial', 15,"bold"), bg=BG_COLOR)
+    password_label.place(x=355, y=90)
+    name_label = tk.Label(frame, text="Name", font=('Arial', 15,"bold"),
+                          bg=BG_COLOR)
+    name_label.place(x=370, y=160)
+    permissions_label = tk.Label(frame, text="permissions", font=
+                                 ('Arial', 15,"bold"), bg=BG_COLOR)
+    permissions_label.place(x=337, y=230)
+    # entries
+    username_entry = tk.Entry(frame, font=('Arial', 15,"bold"), bg=BUTTONS)
+    username_entry.place(x=470, y=15, height=40)
+    password_entry = tk.Entry(frame, font=('Arial', 15,"bold"), bg=BUTTONS)
+    password_entry.place(x=470, y=88, height=40)
+    name_entry = tk.Entry(frame, font=('Arial', 15,"bold"), bg=BUTTONS)
+    name_entry.place(x=470, y=155, height=40)
 
+    # combos
     # combo box data
-    options = user_names()
+    user_options = combo_data("name", "Staff")
 
     # create the combo box
-    combo = ttk.Combobox(frame, values=options, font=('Arial', 15))
-    combo.place(x=40, y=120, height=40)
+    user_combo = ttk.Combobox(frame, values=user_options, font=('Arial', 15))
+    user_combo.place(x=40, y=120, height=40)
+    position_combo = ttk.Combobox(frame, values=PERMISSIONS, font=
+                                  ('Arial', 15))
+    position_combo.place(x=470, y=225, height=40, width= 225)
 
     # Bind key release to the search function
-    combo.bind('<KeyRelease>', lambda event: on_type(event, combo, options))
-    combo.bind('<Return>', lambda event: validate_remove_user(event))
+    user_combo.bind('<KeyRelease>', lambda event: on_type(event, user_combo,
+                    user_options))
+    user_combo.bind('<Return>', lambda event: validate_remove_user(event,
+                    user_combo, user_options))
+    position_combo.bind('<Return>', lambda event: validate_add_user(event, 
+                        position_combo, username_entry, password_entry, 
+                        name_entry))
+    username_entry.bind('<Return>', lambda event: validate_add_user(event, 
+                        position_combo, username_entry, password_entry, 
+                        name_entry))
+    password_entry.bind('<Return>', lambda event: validate_add_user(event, 
+                        position_combo, username_entry, password_entry, 
+                        name_entry))
+    name_entry.bind('<Return>', lambda event: validate_add_user(event, 
+                    position_combo, username_entry, password_entry, 
+                    name_entry))
 
     # buttons
     save_changes = tk.Button(frame, text="Save\nchanges", cursor="hand2",
                              font=('Arial', 15,"bold"), bg=BUTTONS, width=12,
                              height=2, highlightcolor=BLACK, bd=1,
                              relief="solid", command=lambda event=None:
-                             validate_add_user(event))
+                             validate_add_user(event, position_combo, 
+                             username_entry, password_entry, name_entry))
     save_changes.place(x=710, y=210)
     remove_user = tk.Button(frame, text="remove user", cursor="hand2",
                             font=('Arial',18,"bold"), bg=BUTTONS, width=14,
                             height=2, highlightcolor=BLACK, bd=1,
                             relief="solid", command=lambda event=None:
-                            validate_remove_user(event))
+                            validate_remove_user(event, user_combo,
+                            user_options))
     remove_user.place(x=55, y=200)
 
 def validate_password(event, combo, options, password_entry):
@@ -202,7 +259,7 @@ def change_password(frame):
     permissions_label.place(x=100, y=70)
 
     # combo box data
-    options = user_names()
+    options = combo_data("name", "Products")
 
     # create the combo box
     combo = ttk.Combobox(frame, values=options, font=('Arial', 15))
@@ -254,7 +311,7 @@ def change_permissions(frame):
     permissions_label.place(x=40, y=50)
 
     # combo box data
-    options = user_names()
+    options = combo_data("name", "Products")
 
     # create the combo box
     user_combo = ttk.Combobox(frame, values=options, font=('Arial', 15))
@@ -298,7 +355,7 @@ def manage_users(frame):
     change_password(password_frame)
     add_user_frame = tk.Frame(master=frame, bg=BG_COLOR)
     add_user_frame.place(x=0, y=180, width=870, height=300)
-    add_users(add_user_frame)
+    add_remove_users(add_user_frame)
 
     # page buttons for page selector
     permissions = tk.Button(page_frame, text="Change\npermissions",
@@ -462,7 +519,7 @@ def remove_product(frame):
     """All the buttons and labels for remove product in mang_frame"""
     
     # combo box data
-    options = combo_data()
+    options = combo_data("name", "Products")
 
     # create the combo box
     combo = ttk.Combobox(frame, values=options, font=('Arial', 15))
@@ -538,7 +595,7 @@ def product_purchase(frame):
     cost_entry.place(x=300, y=200, height=40)
 
     # combo box data
-    options = combo_data()
+    options = combo_data("name", "Products")
 
     # create the combo box
     combo = ttk.Combobox(frame, values=options, font=('Arial', 15))
@@ -578,7 +635,7 @@ def stock_sold(frame):
     num_entry.place(x=40, y=150, height=40)
 
     # combo box data
-    options = combo_data()
+    options = combo_data("name", "Products")
 
     # create the combo box
     combo = ttk.Combobox(frame, values=options, font=('Arial', 15))
@@ -679,7 +736,7 @@ def inventory_count(frame):
     num_entry.place(x=310, y=150, height=40)
     
     # combo box data
-    options = combo_data()
+    options = combo_data("name", "Products")
 
     # create the combo box
     combo = ttk.Combobox(frame, values=options, font=('Arial', 15))
