@@ -1,7 +1,7 @@
 """This is a Python program that will be for owners of small shops. It will
 connect with a database and allow staff to complete inventory count, generate
 reports, and add new stock or remove old stock
-By: Matt Smith                                                    00/00/2026"""
+By: Matt Smith                                                    26/06/2026"""
 
 import tkinter as tk
 from tkinter import messagebox
@@ -31,12 +31,20 @@ total_price = 0.0
 inventory_list = []
 
 # functions
-def save_changes(table, column, data, where, thing):
+def connect_with_database(qrl, res):
+    """connect with the database"""
     with sqlite3.connect(DATABASE) as d_b:
         cursor = d_b.cursor()
-        qrl = f"""UPDATE {table} SET {column} = "{data}" WHERE {where} 
-        = "{thing}";"""
         cursor.execute(qrl)
+        # return results or not
+        if res == 1:
+            results = cursor.fetchall()
+            return results
+
+def save_changes(table, column, data, where, thing):
+    """default save database update"""
+    connect_with_database(f"""UPDATE {table} SET {column} = "{data}" WHERE 
+                          {where} = "{thing}";""", 2)
 
 def show_frame(window_main, frame, text):
     """Brings the frame to the front and chantages the title"""
@@ -88,11 +96,7 @@ def validate(event, num_entry, combo, options, where):
 def combo_data(column, table):
     """Get the data for the combo box from the database"""
     # connect with the database and get data
-    with sqlite3.connect(DATABASE) as d_b:
-        cursor = d_b.cursor()
-        qrl = f"""SELECT {column} from {table};"""
-        cursor.execute(qrl)
-        results = cursor.fetchall()
+    results = connect_with_database(f"""SELECT {column} from {table};""", 1)
 
     # get the data into options
     options = []
@@ -118,13 +122,8 @@ def on_type(event, combo, options):
 def validate_add_user(event, combo, username, password, name):
     """validate the entries from add user and update the database"""
     # get hightest id
-    with sqlite3.connect(DATABASE) as d_b:
-        cursor = d_b.cursor()
-        # Get the last order ID/no from the database
-        qrl = """SELECT MAX(staff_id) FROM Staff;"""
-        cursor.execute(qrl)
-        result = cursor.fetchall()
-    
+    result = connect_with_database("""SELECT MAX(staff_id) FROM Staff;""", 1)
+
     # create new id
     if result[0][0] is None:
         staff_id = 1
@@ -135,13 +134,10 @@ def validate_add_user(event, combo, username, password, name):
     if combo.get() in PERMISSIONS and not username.get() == "" and not \
         password.get() == "" and not name.get() == "":
         # update the database
-        with sqlite3.connect(DATABASE) as d_b:
-            cursor = d_b.cursor()
-            qrl = f"""INSERT INTO Staff (staff_id, username, password, name, 
-                      permissions) VALUES ({staff_id}, "{username.get()}", 
-                      "{password.get()}", "{name.get()}", 
-                      "{combo.get()}");"""
-            cursor.execute(qrl)
+        connect_with_database(f"""INSERT INTO Staff (staff_id, username, 
+                              password, name, permissions) VALUES ({staff_id}, 
+                              "{username.get()}", "{password.get()}", 
+                              "{name.get()}", "{combo.get()}");""", 2)
         messagebox.showinfo("success", "successfully updated database")
         combo.delete(0, tk.END)
         username.delete(0, tk.END)
@@ -154,10 +150,8 @@ def validate_add_user(event, combo, username, password, name):
 def validate_remove_user(event, combo, options):
     """validate the entries from remove user and update the database"""
     if combo.get() in options:
-        with sqlite3.connect(DATABASE) as d_b:
-            cursor = d_b.cursor()
-            qrl = f"""DELETE FROM Staff WHERE name = "{combo.get()}";"""
-            cursor.execute(qrl)
+        connect_with_database(f"""DELETE FROM Staff WHERE name = 
+                              "{combo.get()}";""", 2)
         messagebox.showinfo("success", "successfully updated database")
         combo.delete(0, tk.END)
     else:
@@ -259,7 +253,7 @@ def change_password(frame):
     permissions_label.place(x=100, y=70)
 
     # combo box data
-    options = combo_data("name", "Products")
+    options = combo_data("name", "Staff")
 
     # create the combo box
     combo = ttk.Combobox(frame, values=options, font=('Arial', 15))
@@ -311,7 +305,7 @@ def change_permissions(frame):
     permissions_label.place(x=40, y=50)
 
     # combo box data
-    options = combo_data("name", "Products")
+    options = combo_data("name", "Staff")
 
     # create the combo box
     user_combo = ttk.Combobox(frame, values=options, font=('Arial', 15))
@@ -384,24 +378,17 @@ def add(event, barcode, name, type, cost, amount, display):
     """validate the entries and update the database"""
 
     # see is barcode is already in the database
-    with sqlite3.connect(DATABASE) as d_b:
-        cursor = d_b.cursor()
-        qrl = f"""SELECT barcode FROM products WHERE barcode = 
-        "{barcode.get()}";"""
-        cursor.execute(qrl)
-        results = cursor.fetchall()
-        if results == []:
-            ask = True
-        else:
-            # ask if the user wishes to change the current entry
-            ask = messagebox.askyesno("Warning", "This barcode already " \
-            "exists do you want to override this entry")
-            if ask == True:
-                with sqlite3.connect(DATABASE) as d_b:
-                    cursor = d_b.cursor()
-                    qrl = f"""DELETE FROM Products WHERE barcode = 
-                    "{barcode.get()}";"""
-                    cursor.execute(qrl)
+    results = connect_with_database(f"""SELECT barcode FROM products WHERE 
+                                    barcode = "{barcode.get()}";""", 1)
+    if results == []:
+        ask = True
+    else:
+        # ask if the user wishes to change the current entry
+        ask = messagebox.askyesno("Warning", "This barcode already " \
+        "exists do you want to override this entry")
+        if ask == True:
+            connect_with_database(f"""DELETE FROM Products WHERE barcode = 
+                                  "{barcode.get()}";""", 2)
     
     # see if any of the entries are empty
     if name.get() == "" or type.get() == "" or display.get() == "":
@@ -412,13 +399,12 @@ def add(event, barcode, name, type, cost, amount, display):
             if ask == True and barcode.get().isdigit() and float(cost.get()) \
                 and amount.get().isdigit():
                 # create a new entry and delete the entries
-                with sqlite3.connect(DATABASE) as d_b:
-                    cursor = d_b.cursor()
-                    qrl = f"""INSERT INTO products (barcode, name, type, cost, 
-                    amount, display_name) VALUES ({barcode.get()}, 
-                    "{name.get()}", "{type.get()}", {cost.get()}, 
-                    {amount.get()}, "{display.get()}");"""
-                    cursor.execute(qrl)
+                connect_with_database(f"""INSERT INTO products (barcode, name, 
+                                      type, cost, amount, display_name) VALUES 
+                                      ({barcode.get()}, "{name.get()}", 
+                                      "{type.get()}", {cost.get()}, 
+                                      {amount.get()}, "{display.get()}");""", 
+                                      2)
                 # reset the entries
                 barcode.delete(0, tk.END)
                 name.delete(0, tk.END)
@@ -506,10 +492,8 @@ def remove(event, combo, options):
         yes_no = messagebox.askyesno("warning", "This action can NOT be "
                                      "undone are you sure?")
         if yes_no == True:
-            with sqlite3.connect(DATABASE) as d_b:
-                cursor = d_b.cursor()
-                qrl = f"""DELETE FROM Products WHERE name = "{combo.get()}";"""
-                cursor.execute(qrl)
+            connect_with_database(f"""DELETE FROM Products WHERE name = 
+                                  "{combo.get()}";""", 2)
             messagebox.showinfo("success", "successfully updated database")
             combo.delete(0, tk.END)
     else:
@@ -544,27 +528,23 @@ def purchase(event, num_entry, combo, options, cost_entry):
         if num_entry.get().isdigit() and combo.get() in options and \
             float(cost_entry.get()):
             if float(cost_entry.get()) > 0:
-                with sqlite3.connect(DATABASE) as d_b:
-                    cursor = d_b.cursor()
-                    qrl = f"""SELECT cost, amount, purchase FROM Products
-                     WHERE name = "{combo.get()}";"""
-                    cursor.execute(qrl)
-                    results = cursor.fetchall()
-                    current_total_value = results[0][1] * results[0][0]
-                    new_total_value = int(num_entry.get()) * \
-                        float(cost_entry.get())
-                    total_quantity = results[0][2] + int(num_entry.get())
-                    total_value = current_total_value + new_total_value
-                    new_cost = total_value / total_quantity
-                    save_changes("Products", "cost", new_cost, "name", 
-                                 combo.get())
-                    save_changes("Products", "purchase", total_quantity,
-                                 "name", combo.get())
-                    num_entry.delete(0, tk.END)
-                    combo.delete(0, tk.END)
-                    cost_entry.delete(0, tk.END)
-                    messagebox.showinfo("success", "successfully updated "
-                                        "database")
+                results = connect_with_database(f"""SELECT cost, amount, 
+                                                purchase FROM Products WHERE 
+                                                name = "{combo.get()}";""", 1)
+                
+                current_total_value = results[0][1] * results[0][0]
+                new_total_value = int(num_entry.get()) * \
+                    float(cost_entry.get())
+                total_quantity = results[0][2] + int(num_entry.get())
+                total_value = current_total_value + new_total_value
+                new_cost = total_value / total_quantity
+                save_changes("Products", "cost", new_cost, "name", combo.get())
+                save_changes("Products", "purchase", total_quantity,"name",
+                             combo.get())
+                num_entry.delete(0, tk.END)
+                combo.delete(0, tk.END)
+                cost_entry.delete(0, tk.END)
+                messagebox.showinfo("success", "successfully updated database")
             else:
                 messagebox.showerror("error", "cost has to be a positive "
                                      "number")
@@ -703,23 +683,20 @@ def make_report():
     """get all the info from the database and add that info to the report"""
     global staff_name, inventory_list
     # connect with the database and get the products info
-    with sqlite3.connect(DATABASE) as d_b:
-        cursor = d_b.cursor()
-        qrl = f"""SELECT * from products;"""
-        cursor.execute(qrl)
-        results = cursor.fetchall()
-        # put the results into the products .py function
-        for x in range(0, len(results)):
-            product = products.products(results[x][0], results[x][8], 
-                                        results[x][2], results[x][2], 
-                                        results[x][3], results[x][4])
-            product.stock_sold(results[x][5])
-            product.inventory_count(results[x][7])
-            product.stock_purchase(results[x][6])
-            # put the item in the list
-            inventory_list.append(product)
-        # run the report program
-        report.report(inventory_list, staff_name)
+    results = connect_with_database("""SELECT * from products;""", 1)
+    
+    # put the results into the products .py function
+    for x in range(0, len(results)):
+        product = products.products(results[x][0], results[x][8],
+                                    results[x][2], results[x][2],
+                                    results[x][3], results[x][4])
+        product.stock_sold(results[x][5])
+        product.inventory_count(results[x][7])
+        product.stock_purchase(results[x][6])
+        # put the item in the list
+        inventory_list.append(product)
+    # run the report program
+    report.report(inventory_list, staff_name)
 
 def inventory_count(frame):
     """All the buttons and labels for the count_frame"""
@@ -842,32 +819,27 @@ def check_login(event, username_entry, password_entry, window):
     """Check if the username and password are correct"""
     global login, staff_position, staff_name
     # connect to the database
-    with sqlite3.connect(DATABASE) as d_b:
-        
-        # Check if the username and password are correct
-        cursor = d_b.cursor()
-        qrl = f"""SELECT name FROM Staff WHERE username = 
-        "{username_entry.get()}" AND password = "{password_entry.get()}";"""
-        cursor.execute(qrl)
-        results = cursor.fetchall()
-        if not results == []:
-            messagebox.showinfo("Login", "Login successful! \n Welcome "
-                                f"{results[0][0]}")
-            staff_name = results[0][0]
+    results = connect_with_database(f"""SELECT name FROM Staff WHERE username 
+                                    = "{username_entry.get()}" AND password = 
+                                    "{password_entry.get()}";""", 1)
+    # Check if the username and password are correct
+    if not results == []:
+        messagebox.showinfo("Login", "Login successful! \n Welcome "
+                            f"{results[0][0]}")
+        staff_name = results[0][0]
 
-            # get the position from the database
-            qrl = f"""SELECT permissions FROM Staff WHERE username = 
-            "{username_entry.get()}";"""
-            cursor.execute(qrl)
-            results = cursor.fetchall()
-            staff_position = results[0][0]
+        # get the position from the database
+        results = connect_with_database(f"""SELECT permissions FROM Staff 
+                                        WHERE username = 
+                                        "{username_entry.get()}";""", 1)
+        staff_position = results[0][0]
 
-            # close the login window
-            window.destroy()
-            login = True
-        else:
-            messagebox.showerror("Login", "Invalid username or password.")
-            password_entry.delete(0, tk.END)
+        # close the login window
+        window.destroy()
+        login = True
+    else:
+        messagebox.showerror("Login", "Invalid username or password.")
+        password_entry.delete(0, tk.END)
 
 def sign_in():
     """Sign in the user"""
