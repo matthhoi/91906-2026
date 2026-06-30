@@ -1,6 +1,6 @@
 """This program is generating a report based on the info given by the calling
 program
-By: Matt Smith                                                    06/05/2026"""
+By: Matt Smith                                                    30/06/2026"""
 
 # import modules
 from tkinter import messagebox
@@ -15,9 +15,9 @@ today = date.today()
 def report(inventory_list, staff_name):
     # generating reports
     with open(f"report-{today.day}.{today.month}.{today.year}.txt", "w") as \
-        report:
+            report:
         # Header Section
-        report.write(f"{'-------------------- Report --------------------':>16}"
+        report.write(f"{'------------------- Report -------------------':>17}"
                      f"\n{'Barcode':<11}{'Name':<14}{'(Qty)':<10}"
                      f"{'Old':<7}{'Purch':<8}{'Total':<8}{'Sold':<8}"
                      f"{'New':<6}Missing\n")
