@@ -1,7 +1,7 @@
 """This is a Python program that will be for owners of small shops. It will
 connect with a database and allow staff to complete inventory count, generate
 reports, and add new stock or remove old stock
-By: Matt Smith                                                    30/06/2026"""
+By: Matt Smith                                                     3/07/2026"""
 
 import tkinter as tk
 from tkinter import messagebox
@@ -9,6 +9,7 @@ import sqlite3
 import manage_users
 import inventory_count
 import inventory_management
+import os
 
 # constants
 DATABASE = "91906-database.db"
@@ -310,6 +311,9 @@ def sign_in():
 
 while __name__ == "__main__":
     """run the program"""
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    os.chdir(script_dir)
+
     # start the login process
     sign_in()
 
