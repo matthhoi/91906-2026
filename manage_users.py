@@ -62,21 +62,12 @@ def validate_remove_user(event, combo, options):
 def add_remove_users(frame):
     """"All the buttons and labels add/remove a user in user_frame"""
     # labels
-    Select_label = tk.Label(frame, text="Select user",
-                            font=('Arial', 20, "bold"), bg=BG_COLOR)
-    Select_label.place(x=80, y=30)
-    username_label = tk.Label(frame, text="username",
-                              font=('Arial', 15, "bold"), bg=BG_COLOR)
-    username_label.place(x=355, y=20)
-    password_label = tk.Label(frame, text="password",
-                              font=('Arial', 15, "bold"), bg=BG_COLOR)
-    password_label.place(x=355, y=90)
-    name_label = tk.Label(frame, text="Name", font=('Arial', 15, "bold"),
-                          bg=BG_COLOR)
-    name_label.place(x=370, y=160)
-    permissions_label = tk.Label(frame, text="permissions",
-                                 font=('Arial', 15, "bold"), bg=BG_COLOR)
-    permissions_label.place(x=337, y=230)
+    main.label(frame, "Select user", 20, 80, 30, BG_COLOR)
+    main.label(frame, "username", 15, 355, 20, BG_COLOR)
+    main.label(frame, "password", 15, 355, 90, BG_COLOR)
+    main.label(frame, "Name", 15, 370, 160, BG_COLOR)
+    main.label(frame, "permissions", 15, 337, 230, BG_COLOR)
+
     # entries
     username_entry = tk.Entry(frame, font=('Arial', 15, "bold"), bg=BUTTONS)
     username_entry.place(x=470, y=15, height=40)
@@ -150,12 +141,8 @@ def change_password(frame):
     user_frame"""
 
     # labels
-    Select_label = tk.Label(frame, text="Select user",
-                            font=('Arial', 20, "bold"), bg=BG_COLOR)
-    Select_label.place(x=360, y=70)
-    permissions_label = tk.Label(frame, text="password",
-                                 font=('Arial', 20, "bold"), bg=BG_COLOR)
-    permissions_label.place(x=100, y=70)
+    main.label(frame, "Select user", 20, 360, 70, BG_COLOR)
+    main.label(frame, "password", 20, 100, 70, BG_COLOR)
 
     # combo box data
     options = main.combo_data("name", "Staff")
@@ -205,12 +192,8 @@ def change_permissions(frame):
     user_frame"""
 
     # labels
-    Select_label = tk.Label(frame, text="Select user",
-                            font=('Arial', 20, "bold"), bg=BG_COLOR)
-    Select_label.place(x=340, y=70)
-    permissions_label = tk.Label(frame, text="New\npermissions",
-                                 font=('Arial', 20, "bold"), bg=BG_COLOR)
-    permissions_label.place(x=40, y=50)
+    main.label(frame, "Select user", 20, 340, 70, BG_COLOR)
+    main.label(frame, "New\npermissions", 20, 40, 50, BG_COLOR)
 
     # combo box data
     options = main.combo_data("name", "Staff")

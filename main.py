@@ -11,7 +11,7 @@ import inventory_count
 import inventory_management
 
 # constants
-DATABASE = "91906-2026\91906-database.db"
+DATABASE = "91906-database.db"
 BG_COLOR = "#cccccc"
 LABEL_COLOR = "#efefef"
 WHITE = "#ffffff"
@@ -26,6 +26,13 @@ staff_position = "Admin"
 staff_name = ""
 
 # functions
+
+
+def label(frame, text, font, x, y, bg):
+    """make code smaller by cuing out 2 lines for each label"""
+    label = tk.Label(frame, text=text, font=('Arial', font, "bold"),
+                     bg=bg)
+    label.place(x=x, y=y)
 
 
 def connect_with_database(qrl, res):
@@ -126,7 +133,7 @@ def on_type(event, combo, options):
 
 def main_window():
     """Create the main window and call the other layers"""
-    global exit
+    global exit, staff_name
     while exit is False:
         # Create the main menu window
         window_main = tk.Tk()
@@ -153,7 +160,7 @@ def main_window():
         # inventory count
         count_frame = tk.Frame(master=window_main, bg=BG_COLOR)
         count_frame.place(x=15, y=150, width=870, height=480)
-        inventory_count.inventory_count(count_frame)
+        inventory_count.inventory_count(count_frame, staff_name)
 
         # page buttons for page selector
         users = tk.Button(win_frame, text="manage users", cursor="hand2",
@@ -248,26 +255,20 @@ def sign_in():
         frame.place(x=200, y=75, width=600, height=500)
 
         # text
-        text = tk.Label(frame, text="login", font=('Arial', 25, "bold"),
-                        bg=WHITE)
-        text.place(x=250, y=15)
+        label(frame, "login", 25, 250, 15, WHITE)
+        label(frame, "Username", 15, 50, 100, WHITE)
+        label(frame, "Password", 15, 50, 200, WHITE)
 
         # Create the login fields
-        username_label = tk.Label(frame, text="Username",
-                                  font=('Arial', 15, "bold"), bg=WHITE)
         username_entry = tk.Entry(frame, width=75, bg=BG_COLOR, relief="flat",
                                   highlightbackground=BLACK,
                                   highlightthickness=1)
-        password_label = tk.Label(frame, text="Password",
-                                  font=('Arial', 15, "bold"), bg=WHITE)
         password_entry = tk.Entry(frame, show=is_visible, width=75,
                                   bg=BG_COLOR, relief="flat",
                                   highlightbackground=BLACK,
                                   highlightthickness=1)
         username_entry.place(x=25, y=130)
-        username_label.place(x=50, y=100)
         password_entry.place(x=25, y=230)
-        password_label.place(x=50, y=200)
 
         # show password button
         show_password_b = tk.Button(frame, text=Show_Password_txt,

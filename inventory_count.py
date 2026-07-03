@@ -7,6 +7,7 @@ import tkinter as tk
 from tkinter import ttk
 import main
 import report
+import products
 
 BUTTONS = "#C5C2D0"
 BG_COLOR = "#cccccc"
@@ -17,15 +18,14 @@ inventory_list = []
 # inventory count
 
 
-def make_report():
+def make_report(staff_name):
     """get all the info from the database and add that info to the report"""
-    staff_name = main.staff_name
     # connect with the database and get the products info
     results = main.connect_with_database("""SELECT * from products;""", 1)
 
     # put the results into the products .py function
     for x in range(0, len(results)):
-        product = main.products.products(results[x][0], results[x][8],
+        product = products.products(results[x][0], results[x][8],
                                          results[x][2], results[x][2],
                                          results[x][3], results[x][4])
         product.stock_sold(results[x][5])
@@ -37,15 +37,11 @@ def make_report():
     report.report(inventory_list, staff_name)
 
 
-def inventory_count(frame):
+def inventory_count(frame, staff_name):
     """All the buttons and labels for the count_frame"""
     # labels
-    Select_label = tk.Label(frame, text="Select product",
-                            font=('Arial', 20, "bold"), bg=BG_COLOR)
-    Select_label.place(x=40, y=50)
-    num_of_label = tk.Label(frame, text="Number of product",
-                            font=('Arial', 20, "bold"), bg=BG_COLOR)
-    num_of_label.place(x=300, y=50)
+    main.label(frame, "Select product", 20, 40, 50, BG_COLOR)
+    main.label(frame, "Number of product", 20, 300, 50, BG_COLOR)
 
     # entries
     num_entry = tk.Entry(frame, font=('Arial', 15, "bold"), bg=BUTTONS)
@@ -70,7 +66,8 @@ def inventory_count(frame):
     gen_report = tk.Button(frame, text="Generate report", cursor="hand2",
                            font=('Arial', 17, "bold"), bg=BUTTONS, width=19,
                            height=3, highlightcolor=BLACK, bd=1,
-                           relief="solid", command=lambda: make_report())
+                           relief="solid", command=lambda:
+                           make_report(staff_name))
     gen_report.place(x=590, y=350)
     Save_changes = tk.Button(frame, text="Save changes", cursor="hand2",
                              font=('Arial', 17, "bold"), bg=BUTTONS, width=19,

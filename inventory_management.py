@@ -69,24 +69,12 @@ def add_product(frame):
     """All the buttons and labels for adding a product in mang_frame"""
 
     # labels
-    barcode_label = tk.Label(frame, text="Barcode",
-                             font=('Arial', 12, "bold"), bg=BG_COLOR)
-    barcode_label.place(x=20, y=23)
-    name_label = tk.Label(frame, text="Name", font=('Arial', 12, "bold"),
-                          bg=BG_COLOR)
-    name_label.place(x=25, y=123)
-    type_label = tk.Label(frame, text="Type", font=('Arial', 12, "bold"),
-                          bg=BG_COLOR)
-    type_label.place(x=25, y=223)
-    cost_label = tk.Label(frame, text="Cost", font=('Arial', 12, "bold"),
-                          bg=BG_COLOR)
-    cost_label.place(x=380, y=23)
-    amount_label = tk.Label(frame, text="Amount", font=('Arial', 12, "bold"),
-                            bg=BG_COLOR)
-    amount_label.place(x=370, y=123)
-    display_label = tk.Label(frame, text="display\nname",
-                             font=('Arial', 12, "bold"), bg=BG_COLOR)
-    display_label.place(x=370, y=223)
+    main.label(frame, "Barcode", 12, 20, 23, BG_COLOR)
+    main.label(frame, "Name", 12, 25, 123, BG_COLOR)
+    main.label(frame, "Type", 12, 25, 223, BG_COLOR)
+    main.label(frame, "Cost", 12, 380, 23, BG_COLOR)
+    main.label(frame, "Amount", 12, 370, 123, BG_COLOR)
+    main.label(frame, "display\nname", 12, 370, 223,BG_COLOR)
 
     # entries
     barcode_entry = tk.Entry(frame, font=('Arial', 15, "bold"), bg=BUTTONS)
@@ -184,7 +172,7 @@ def purchase(event, num_entry, combo, options, cost_entry):
                 current_total_value = results[0][1] * results[0][0]
                 new_total_value = int(num_entry.get()) * \
                     float(cost_entry.get())
-                total_quantity = results[0][2] + int(num_entry.get())
+                total_quantity = results[0][1] + int(num_entry.get())
                 total_value = current_total_value + new_total_value
                 new_cost = total_value / total_quantity
                 main.save_changes("Products", "cost", new_cost, "name",
@@ -209,15 +197,9 @@ def product_purchase(frame):
     """All the buttons and labels for product purchase in mang_frame"""
 
     # labels
-    select_label = tk.Label(frame, text="Select product",
-                            font=('Arial', 20, "bold"), bg=BG_COLOR)
-    select_label.place(x=620, y=150)
-    amount_label = tk.Label(frame, text="Amount \npurchased",
-                            font=('Arial', 20, "bold"), bg=BG_COLOR)
-    amount_label.place(x=60, y=80)
-    cost_label = tk.Label(frame, text="Cost",
-                          font=('Arial', 20, "bold"), bg=BG_COLOR)
-    cost_label.place(x=80, y=200)
+    main.label(frame, "Select product", 20, 620, 150,BG_COLOR)
+    main.label(frame, "Amount\npurchased", 20, 60, 80, BG_COLOR)
+    main.label(frame, "Cost", 20, 80, 200, BG_COLOR)
 
     # entries
     num_entry = tk.Entry(frame, font=('Arial', 15, "bold"), bg=BUTTONS)
@@ -256,12 +238,8 @@ def stock_sold(frame):
     """All the buttons and labels for stock sold in mang_frame"""
 
     # labels
-    Select_label = tk.Label(frame, text="Select product",
-                            font=('Arial', 20, "bold"), bg=BG_COLOR)
-    Select_label.place(x=320, y=50)
-    amount_label = tk.Label(frame, text="Amount sold",
-                            font=('Arial', 20, "bold"), bg=BG_COLOR)
-    amount_label.place(x=60, y=50)
+    main.label(frame, "Select product", 20, 320, 50, BG_COLOR)
+    main.label(frame, "Amount sold", 20, 60, 50, BG_COLOR)
 
     # entries
     num_entry = tk.Entry(frame, font=('Arial', 15, "bold"), bg=BUTTONS)
