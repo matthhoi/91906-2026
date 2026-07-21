@@ -5,6 +5,7 @@ By: Matt Smith                                                    30/06/2026"""
 # import modules
 from tkinter import messagebox
 from datetime import date
+import main
 
 # global variables
 today = date.today()
@@ -45,6 +46,11 @@ def report(inventory_list, staff_name):
                          f"{item[3]:<8}{(item[2]+item[3]):<8}"
                          f"{item[6]:<8}{item[4]:<6}"
                          f"{((item[2]+item[3])-item[4]-item[6])}\n")
+            
+            main.save_changes("products", "amount", item[4], "barcode", item[0])
+            main.save_changes("products", "purchase", 0, "barcode", item[0])
+            main.save_changes("products", "count", 0, "barcode", item[0])
+            main.save_changes("products", "sold", 0, "barcode", item[0])
 
         report.write("-" * 80 + "\n")
 
