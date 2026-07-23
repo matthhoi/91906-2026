@@ -156,12 +156,12 @@ def main_window():
         # inventory management
         mang_frame = tk.Frame(master=window_main, bg=BG_COLOR)
         mang_frame.place(x=15, y=150, width=870, height=480)
-        inventory_management.inventory_management(mang_frame)
+        inventory_management.inventory_management(mang_frame, staff_name)
 
         # inventory count
         count_frame = tk.Frame(master=window_main, bg=BG_COLOR)
         count_frame.place(x=15, y=150, width=870, height=480)
-        inventory_count.inventory_count(count_frame, staff_name)
+        inventory_count.inventory_count(count_frame)
 
         # page buttons for page selector
         users = tk.Button(win_frame, text="manage users", cursor="hand2",
