@@ -75,7 +75,7 @@ def add_product(frame):
     # labels
     main.label(frame, "Barcode", 12, 20, 23, BG_COLOR)
     main.label(frame, "Name", 12, 25, 123, BG_COLOR)
-    main.label(frame, "Type", 12, 25, 223, BG_COLOR)
+    main.label(frame, "Category", 12, 20, 223, BG_COLOR)
     main.label(frame, "Cost", 12, 380, 23, BG_COLOR)
     main.label(frame, "Amount", 12, 370, 123, BG_COLOR)
     main.label(frame, "display\nname", 12, 370, 223,BG_COLOR)
