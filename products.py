@@ -29,12 +29,6 @@ class products:
         # to increase the purchase amount
         self.purchase = amount
 
-    def finish_report(self):
-        # to reset the item after a report is generated
-        self.old = self.current
-        self.current = 0
-        self.purchase = 0
-
     def description(self):
         # info for the report
         return [self.barcode, self.product_name, self.old, self.purchase,

@@ -22,6 +22,8 @@ def validate_add_user(event, combo, username, password, name):
     # get hightest id
     result = main.connect_with_database("""SELECT MAX(staff_id) FROM Staff;""",
                                         1)
+    user_names = main.connect_with_database("""SELECT username FROM Staff;""",
+                                            1)
 
     # create new id
     if result[0][0] is None:
@@ -29,23 +31,29 @@ def validate_add_user(event, combo, username, password, name):
     else:
         staff_id = result[0][0] + 1
 
-    # cheek the entries
-    if combo.get() in PERMISSIONS and not username.get() == "" and not \
-            password.get() == "" and not name.get() == "":
-        # update the database
-        main.connect_with_database(f"""INSERT INTO Staff (staff_id, username,
-                                   password, name, permissions) VALUES
-                                   ({staff_id}, "{username.get()}",
-                                   "{password.get()}", "{name.get()}",
-                                   "{combo.get()}");""", 2)
-        messagebox.showinfo("success", "successfully updated database")
-        combo.delete(0, tk.END)
-        username.delete(0, tk.END)
-        password.delete(0, tk.END)
-        name.delete(0, tk.END)
+    # cheek if username already exists
+    if not username.get() in user_names[0]:
+        # cheek the entries
+        if combo.get() in PERMISSIONS and not username.get() == "" and not \
+                password.get() == "" and not name.get() == "":
+            # update the database
+            main.connect_with_database(f"""INSERT INTO Staff (staff_id,
+                                       username, password, name, permissions)
+                                       VALUES({staff_id}, "{username.get()}",
+                                       "{password.get()}", "{name.get()}",
+                                       "{combo.get()}");""", 2)
+            messagebox.showinfo("success", "successfully updated database")
+            combo.delete(0, tk.END)
+            username.delete(0, tk.END)
+            password.delete(0, tk.END)
+            name.delete(0, tk.END)
+        else:
+            messagebox.showerror("error", "entries cant be blank or "
+                                 "permissions has to be in options")
     else:
-        messagebox.showerror("error", "entries cant be blank or permissions "
-                             "has to be in options")
+        messagebox.showerror("error", "username already exists choose another"
+                             " one")
+        username.delete(0, tk.END)
 
 
 def validate_remove_user(event, combo, options):

@@ -41,6 +41,7 @@ def connect_with_database(qrl, res):
     with sqlite3.connect(DATABASE) as d_b:
         cursor = d_b.cursor()
         cursor.execute(qrl)
+        print(cursor.description())
         # return results or not
         if res == 1:
             results = cursor.fetchall()
@@ -85,7 +86,7 @@ def validate(event, num_entry, combo, options, where):
     """validate the entries"""
     # validate entries
     try:
-        if num_entry.get().isdigit() and combo.get() in options:
+        if num_entry.get().isdigit() > 0 and combo.get() in options:
             if where == 1:
                 save_changes("Products", "count", num_entry.get(), "name",
                              combo.get())
@@ -98,9 +99,9 @@ def validate(event, num_entry, combo, options, where):
             combo.delete(0, tk.END)
         else:
             messagebox.showerror("error", "Number of products has to be a "
-                                 "number and or product has to be selected")
+                                 "number <0 and or product has to be selected")
     except Exception:
-        messagebox.showerror("error", f"cost has to be a number")
+        messagebox.showerror("error", f"cost/amount has to be a number")
 
 
 def combo_data(column, table):
@@ -139,7 +140,7 @@ def main_window():
         # Create the main menu window
         window_main = tk.Tk()
         window_main.title("main window")
-        window_main.geometry("900x650")
+        window_main.geometry(center(window_main, 900, 650))
         window_main.config(bg=BG_COLOR)
         window_main.resizable(width=False, height=False)
 
@@ -183,6 +184,8 @@ def main_window():
                           command=lambda: show_frame(window_main, count_frame,
                                                      "Inventory count"))
         count.place(x=590, y=15)
+
+        window_main.bind("<Control-w>", lambda e: window_main.destroy())
 
         window_main.mainloop()
 
@@ -236,7 +239,15 @@ def check_login(event, username_entry, password_entry, window):
     else:
         messagebox.showerror("Login", "Invalid username or password.")
         password_entry.delete(0, tk.END)
+    
 
+def center(window, width, height):
+    """center the screen in the middle of the users screen"""
+    screen_width = window.winfo_screenwidth()
+    screen_height = window.winfo_screenheight()
+    center_x = int(screen_width / 2 - width / 2)
+    center_y = int(screen_height / 2 - height / 2)
+    return (f"{width}x{height}+{center_x}+{center_y}")
 
 def sign_in():
     """Sign in the user"""
@@ -247,9 +258,9 @@ def sign_in():
         # Create the login window
         window = tk.Tk()
         window.title("Login Window")
-        window.geometry("1000x650")
         window.config(bg=BG_COLOR)
         window.resizable(width=False, height=False)
+        window.geometry(center(window, 1000, 650))
 
         # Create the main Frame
         frame = tk.Frame(master=window, bg=WHITE)
@@ -292,6 +303,8 @@ def sign_in():
                             username_entry, password_entry, window))
         username_entry.bind('<Return>', lambda event: check_login(event,
                             username_entry, password_entry, window))
+        
+        window.bind("<Control-w>", lambda e: window.destroy())
 
         window.mainloop()
 
