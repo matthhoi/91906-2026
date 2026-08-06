@@ -41,7 +41,6 @@ def connect_with_database(qrl, res):
     with sqlite3.connect(DATABASE) as d_b:
         cursor = d_b.cursor()
         cursor.execute(qrl)
-        print(cursor.description())
         # return results or not
         if res == 1:
             results = cursor.fetchall()
