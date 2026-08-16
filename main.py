@@ -1,7 +1,7 @@
 """This is a Python program that will be for owners of small shops. It will
 connect with a database and allow staff to complete inventory count, generate
 reports, and add new stock or remove old stock
-By: Matt Smith                                                     3/07/2026"""
+By: Matt Smith                                                    13/08/2026"""
 
 import tkinter as tk
 from tkinter import messagebox
@@ -53,35 +53,39 @@ def save_changes(table, column, data, where, thing):
                           {where} = "{thing}";""", 2)
 
 
-def show_frame(window_main, frame, text):
+def show_frame(window_main, frame, text, self, others):
     """Brings the frame to the front and chantages the title"""
     if text == "no":
         pass
     else:
         window_main.title(text)
     frame.tkraise()
+    for item in others:
+        item.config(bg=LABEL_COLOR)
+    self.config(bg=BG_COLOR)
 
 
-def permissions(window_main, frame, button):
+def permissions(window_main, frame, button, self, others):
     """Check the users permissions"""
     global staff_position
     # check if the user has the admin permissions
     if button == "manage users":
         if staff_position == "Admin":
-            show_frame(window_main, frame, "manage users")
+            show_frame(window_main, frame, "manage users", self, others)
         else:
             messagebox.showerror("Error", "You don't have the correct "
                                  "permissions")
     # check if the user has the admin or manager permissions
     elif button == "Inventory management":
         if staff_position == "Manager" or staff_position == "Admin":
-            show_frame(window_main, frame, "Inventory management")
+            show_frame(window_main, frame, "Inventory management", self,
+                       others)
         else:
             messagebox.showerror("Error", "You don't have the correct "
                                  "permissions")
 
 
-def validate(event, num_entry, combo, options, where):
+def validate(num_entry, combo, options, where):
     """validate the entries"""
     # validate entries
     try:
@@ -115,7 +119,7 @@ def combo_data(column, table):
     return options
 
 
-def on_type(event, combo, options):
+def on_type(combo, options):
     """sorts the data in options"""
     # Get current text from the combobox
     typed_text = combo.get()
@@ -142,7 +146,6 @@ def main_window():
         window_main.geometry(center(window_main, 900, 650))
         window_main.config(bg=BG_COLOR)
         window_main.resizable(width=False, height=False)
-
         # frames
         # page selector
         win_frame = tk.Frame(master=window_main, bg=WHITE)
@@ -168,20 +171,23 @@ def main_window():
                           font=('Arial', 17, "bold"), bg=LABEL_COLOR, width=19,
                           height=3, highlightcolor=BLACK, bd=1, relief="solid",
                           command=lambda: permissions(window_main, users_frame,
-                                                      "manage users"))
+                                                      "manage users", users,
+                                                      (mang, count)))
         users.place(x=5, y=15)
         mang = tk.Button(win_frame, text="Inventory management",
                          cursor="hand2", font=('Arial', 17, "bold"),
                          bg=LABEL_COLOR, width=19, height=3,
                          highlightcolor=BLACK, bd=1, relief="solid",
                          command=lambda: permissions(window_main, mang_frame,
-                                                     "Inventory management"))
+                                                     "Inventory management",
+                                                     mang, (users, count)))
         mang.place(x=300, y=15)
         count = tk.Button(win_frame, text="Inventory count", cursor="hand2",
-                          font=('Arial', 17, "bold"), bg=LABEL_COLOR, width=19,
+                          font=('Arial', 17, "bold"), bg=BG_COLOR, width=19,
                           height=3, highlightcolor=BLACK, bd=1, relief="solid",
                           command=lambda: show_frame(window_main, count_frame,
-                                                     "Inventory count"))
+                                                     "Inventory count", count,
+                                                     (users, mang)))
         count.place(x=590, y=15)
 
         window_main.bind("<Control-w>", lambda e: window_main.destroy())
@@ -213,7 +219,7 @@ def show_password(password_entry):
         Show_Password_txt = "Show Password"
 
 
-def check_login(event, username_entry, password_entry, window):
+def check_login(username_entry, password_entry, window):
     """Check if the username and password are correct"""
     global login, staff_position, staff_name
     # connect to the database
@@ -238,7 +244,7 @@ def check_login(event, username_entry, password_entry, window):
     else:
         messagebox.showerror("Login", "Invalid username or password.")
         password_entry.delete(0, tk.END)
-    
+
 
 def center(window, width, height):
     """center the screen in the middle of the users screen"""
@@ -247,6 +253,7 @@ def center(window, width, height):
     center_x = int(screen_width / 2 - width / 2)
     center_y = int(screen_height / 2 - height / 2)
     return (f"{width}x{height}+{center_x}+{center_y}")
+
 
 def sign_in():
     """Sign in the user"""
@@ -293,16 +300,16 @@ def sign_in():
         login_button = tk.Button(frame, text="sign in", cursor="hand2",
                                  font=('Arial', 15, "bold"), bg=LABEL_COLOR,
                                  highlightcolor=BLACK, bd=1, relief="solid",
-                                 width=10, height=2, command=lambda event=None:
-                                 check_login(event, username_entry,
-                                             password_entry, window))
+                                 width=10, height=2, command=lambda:
+                                 check_login(username_entry, password_entry,
+                                             window))
         login_button.place(x=225, y=400)
 
-        password_entry.bind('<Return>', lambda event: check_login(event,
+        password_entry.bind('<Return>', lambda event: check_login(
                             username_entry, password_entry, window))
-        username_entry.bind('<Return>', lambda event: check_login(event,
+        username_entry.bind('<Return>', lambda event: check_login(
                             username_entry, password_entry, window))
-        
+
         window.bind("<Control-w>", lambda e: window.destroy())
 
         window.mainloop()

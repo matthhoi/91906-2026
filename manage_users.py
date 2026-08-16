@@ -1,7 +1,7 @@
 """This is a Python program that will be for owners of small shops. It will
 connect with a database and allow staff to complete inventory count, generate
 reports, and add new stock or remove old stock
-By: Matt Smith                                                    30/06/2026"""
+By: Matt Smith                                                    13/08/2026"""
 
 import tkinter as tk
 from tkinter import messagebox
@@ -17,7 +17,7 @@ PERMISSIONS = ["Admin", "Manager", "User"]
 # manage users
 
 
-def validate_add_user(event, combo, username, password, name):
+def validate_add_user(combo, username, password, name):
     """validate the entries from add user and update the database"""
     # get hightest id
     result = main.connect_with_database("""SELECT MAX(staff_id) FROM Staff;""",
@@ -56,7 +56,7 @@ def validate_add_user(event, combo, username, password, name):
         username.delete(0, tk.END)
 
 
-def validate_remove_user(event, combo, options):
+def validate_remove_user(combo, options):
     """validate the entries from remove user and update the database"""
     if combo.get() in options:
         main.connect_with_database(f"""DELETE FROM Staff WHERE name =
@@ -96,42 +96,39 @@ def add_remove_users(frame):
     position_combo.place(x=470, y=225, height=40, width=225)
 
     # Bind key release to the search function
-    user_combo.bind('<KeyRelease>', lambda event: main.on_type(event,
-                    user_combo, user_options))
-    user_combo.bind('<Return>', lambda event: validate_remove_user(event,
-                    user_combo, user_options))
-    position_combo.bind('<Return>', lambda event: validate_add_user(event,
+    user_combo.bind('<KeyRelease>', lambda event: main.on_type(user_combo,
+                    user_options))
+    user_combo.bind('<Return>', lambda event: validate_remove_user(user_combo,
+                    user_options))
+    position_combo.bind('<Return>', lambda event: validate_add_user(
                         position_combo, username_entry, password_entry,
                         name_entry))
-    username_entry.bind('<Return>', lambda event: validate_add_user(event,
+    username_entry.bind('<Return>', lambda event: validate_add_user(
                         position_combo, username_entry, password_entry,
                         name_entry))
-    password_entry.bind('<Return>', lambda event: validate_add_user(event,
+    password_entry.bind('<Return>', lambda event: validate_add_user(
                         position_combo, username_entry, password_entry,
                         name_entry))
-    name_entry.bind('<Return>', lambda event: validate_add_user(event,
-                    position_combo, username_entry, password_entry,
-                    name_entry))
+    name_entry.bind('<Return>', lambda event: validate_add_user(position_combo,
+                    username_entry, password_entry, name_entry))
 
     # buttons
     save_changes = tk.Button(frame, text="Save\nchanges", cursor="hand2",
                              font=('Arial', 15, "bold"), bg=BUTTONS, width=12,
                              height=2, highlightcolor=BLACK, bd=1,
-                             relief="solid", command=lambda event=None:
-                             validate_add_user(event, position_combo,
-                                               username_entry, password_entry,
-                                               name_entry))
+                             relief="solid", command=lambda:
+                             validate_add_user(position_combo, username_entry,
+                                               password_entry, name_entry))
     save_changes.place(x=710, y=210)
     remove_user = tk.Button(frame, text="remove user", cursor="hand2",
                             font=('Arial', 18, "bold"), bg=BUTTONS, width=14,
                             height=2, highlightcolor=BLACK, bd=1,
-                            relief="solid", command=lambda event=None:
-                            validate_remove_user(event, user_combo,
-                                                 user_options))
+                            relief="solid", command=lambda:
+                            validate_remove_user(user_combo, user_options))
     remove_user.place(x=55, y=200)
 
 
-def validate_password(event, combo, options, password_entry):
+def validate_password(combo, options, password_entry):
     """validate the entries from change password and update the database"""
     if combo.get() in options and not password_entry.get() == "":
         main.save_changes("staff", "password", password_entry.get(), "name",
@@ -164,24 +161,22 @@ def change_password(frame):
     password_entry.place(x=10, y=150, height=40)
 
     # Bind key release to the search function
-    combo.bind('<KeyRelease>', lambda event: main.on_type(event, combo,
-                                                          options))
-    combo.bind('<Return>', lambda event: validate_password(event, combo,
-               options, password_entry))
-    password_entry.bind('<Return>', lambda event: validate_password(event,
-                        combo, options, password_entry))
+    combo.bind('<KeyRelease>', lambda event: main.on_type(combo, options))
+    combo.bind('<Return>', lambda event: validate_password(combo, options,
+               password_entry))
+    password_entry.bind('<Return>', lambda event: validate_password(combo,
+                        options, password_entry))
 
     # buttons
     Save_changes = tk.Button(frame, text="Save changes", cursor="hand2",
                              font=('Arial', 17, "bold"), bg=BUTTONS, width=18,
                              height=3, highlightcolor=BLACK, bd=1,
-                             relief="solid", command=lambda event=None:
-                             validate_password(event, combo, options,
-                                               password_entry))
+                             relief="solid", command=lambda:
+                             validate_password(combo, options, password_entry))
     Save_changes.place(x=590, y=25)
 
 
-def validate_permissions(event, user_combo, options, permission_combo):
+def validate_permissions(user_combo, options, permission_combo):
     """validate the entries from change permissions and update the database"""
     # validate entries
     if user_combo.get() in options and permission_combo.get() in PERMISSIONS:
@@ -219,17 +214,17 @@ def change_permissions(frame):
                                     font=('Arial', 15))
     permission_combo.place(x=10, y=150, height=40)
 
-    user_combo.bind('<Return>', lambda event: validate_permissions(event,
-                    user_combo, options, permission_combo))
-    permission_combo.bind('<Return>', lambda event: validate_permissions(event,
+    user_combo.bind('<Return>', lambda event: validate_permissions(user_combo,
+                    options, permission_combo))
+    permission_combo.bind('<Return>', lambda event: validate_permissions(
                           user_combo, options, permission_combo))
 
     # buttons
     Save_changes = tk.Button(frame, text="Save changes", cursor="hand2",
                              font=('Arial', 17, "bold"), bg=BUTTONS, width=19,
                              height=3, highlightcolor=BLACK, bd=1,
-                             relief="solid", command=lambda event=None:
-                             validate_permissions(event, user_combo, options,
+                             relief="solid", command=lambda:
+                             validate_permissions(user_combo, options,
                                                   permission_combo))
     Save_changes.place(x=590, y=25)
 
@@ -257,18 +252,21 @@ def manage_users(frame):
                             bg=LABEL_COLOR, width=15, height=4,
                             highlightcolor=BLACK, bd=1, relief="solid",
                             command=lambda: main.show_frame
-                            (None, permissions_frame, "no"))
+                            (None, permissions_frame, "no", permissions,
+                             (password, add_user)))
     permissions.place(x=5, y=15)
     password = tk.Button(page_frame, text="Change\npassword", cursor="hand2",
                          font=('Arial', 17, "bold"), bg=LABEL_COLOR, width=15,
                          height=4, highlightcolor=BLACK, bd=1, relief="solid",
                          command=lambda: main.show_frame
-                         (None, password_frame, "no"))
+                         (None, password_frame, "no", password,
+                          (permissions, add_user)))
     password.place(x=300, y=15)
     add_user = tk.Button(page_frame, text="Create/Remove\nuser",
                          cursor="hand2", font=('Arial', 17, "bold"),
-                         bg=LABEL_COLOR, width=15, height=4,
+                         bg=BG_COLOR, width=15, height=4,
                          highlightcolor=BLACK, bd=1, relief="solid",
                          command=lambda: main.show_frame
-                         (None, add_user_frame, "no"))
+                         (None, add_user_frame, "no", add_user,
+                          (permissions, password)))
     add_user.place(x=600, y=15)

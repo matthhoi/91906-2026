@@ -1,7 +1,7 @@
 """This is a Python program that will be for owners of small shops. It will
 connect with a database and allow staff to complete inventory count, generate
 reports, and add new stock or remove old stock
-By: Matt Smith                                                    30/06/2026"""
+By: Matt Smith                                                    13/08/2026"""
 
 import tkinter as tk
 from tkinter import messagebox
@@ -21,7 +21,7 @@ inventory_list = []
 # inventory management
 
 
-def add(event, barcode, name, type, cost, amount, display):
+def add(barcode, name, type, cost, amount, display):
     """validate the entries and update the database"""
 
     # see is barcode is already in the database
@@ -48,11 +48,13 @@ def add(event, barcode, name, type, cost, amount, display):
                     and amount.get().isdigit():
                 # create a new entry and delete the entries
                 main.connect_with_database(f"""INSERT INTO products (barcode,
-                                           name, type, cost, amount, display_
-                                           name) VALUES ({barcode.get()},
-                                           "{name.get()}", "{type.get()}",
-                                           {cost.get()}, {amount.get()},
-                                           "{display.get()}");""", 2)
+                                           name, type, cost, amount,
+                                           display_name) VALUES
+                                           ({barcode.get()}, "{name.get()}",
+                                           "{type.get()}", {float(cost.get())},
+                                           {amount.get()}, "{display.get()}"
+                                           );""", 2)
+                messagebox.showinfo("success", "successfully updated database")
                 # reset the entries
                 barcode.delete(0, tk.END)
                 name.delete(0, tk.END)
@@ -78,7 +80,7 @@ def add_product(frame):
     main.label(frame, "Category", 12, 20, 223, BG_COLOR)
     main.label(frame, "Cost", 12, 380, 23, BG_COLOR)
     main.label(frame, "Amount", 12, 370, 123, BG_COLOR)
-    main.label(frame, "display\nname", 12, 370, 223,BG_COLOR)
+    main.label(frame, "display\nname", 12, 370, 223, BG_COLOR)
 
     # entries
     barcode_entry = tk.Entry(frame, font=('Arial', 15, "bold"), bg=BUTTONS)
@@ -94,36 +96,30 @@ def add_product(frame):
     display_entry = tk.Entry(frame, font=('Arial', 15, "bold"), bg=BUTTONS)
     display_entry.place(x=470, y=220, height=40)
 
-    barcode_entry.bind('<Return>', lambda event: add(event, barcode_entry,
-                       name_entry, type_entry, cost_entry, amount_entry,
-                       display_entry))
-    name_entry.bind('<Return>', lambda event: add(event, barcode_entry,
-                    name_entry, type_entry, cost_entry, amount_entry,
-                    display_entry))
-    type_entry.bind('<Return>', lambda event: add(event, barcode_entry,
-                    name_entry, type_entry, cost_entry, amount_entry,
-                    display_entry))
-    cost_entry.bind('<Return>', lambda event: add(event, barcode_entry,
-                    name_entry, type_entry, cost_entry, amount_entry,
-                    display_entry))
-    amount_entry.bind('<Return>', lambda event: add(event, barcode_entry,
-                      name_entry, type_entry, cost_entry, amount_entry,
-                      display_entry))
-    display_entry.bind('<Return>', lambda event: add(event, barcode_entry,
-                       name_entry, type_entry, cost_entry, amount_entry,
-                       display_entry))
+    barcode_entry.bind('<Return>', lambda event: add(barcode_entry, name_entry,
+                       type_entry, cost_entry, amount_entry, display_entry))
+    name_entry.bind('<Return>', lambda event: add(barcode_entry, name_entry,
+                    type_entry, cost_entry, amount_entry, display_entry))
+    type_entry.bind('<Return>', lambda event: add(barcode_entry, name_entry,
+                    type_entry, cost_entry, amount_entry, display_entry))
+    cost_entry.bind('<Return>', lambda event: add(barcode_entry, name_entry,
+                    type_entry, cost_entry, amount_entry, display_entry))
+    amount_entry.bind('<Return>', lambda event: add(barcode_entry, name_entry,
+                      type_entry, cost_entry, amount_entry, display_entry))
+    display_entry.bind('<Return>', lambda event: add(barcode_entry, name_entry,
+                       type_entry, cost_entry, amount_entry, display_entry))
 
     # buttons
     update = tk.Button(frame, text="Save\nchanges", cursor="hand2",
                        font=('Arial', 15, "bold"), bg=BUTTONS, width=12,
                        height=2, highlightcolor=BLACK, bd=1, relief="solid",
-                       command=lambda event=None:
-                       add(event, barcode_entry, name_entry, type_entry,
-                           cost_entry, amount_entry, display_entry))
+                       command=lambda: add(barcode_entry, name_entry,
+                                           type_entry, cost_entry,
+                                           amount_entry, display_entry))
     update.place(x=710, y=210)
 
 
-def remove(event, combo, options):
+def remove(combo, options):
     """validate the entries and update the database"""
     # validate entries
     if combo.get() in options:
@@ -149,20 +145,18 @@ def remove_product(frame):
     combo.place(x=300, y=200, height=40)
 
     # Bind key release to the search function
-    combo.bind('<KeyRelease>', lambda event: main.on_type(event, combo,
-                                                          options))
-    combo.bind('<Return>', lambda event: remove(event, combo, options))
+    combo.bind('<KeyRelease>', lambda event: main.on_type(combo, options))
+    combo.bind('<Return>', lambda event: remove(combo, options))
 
     # buttons
     update = tk.Button(frame, text="remove product", cursor="hand2",
                        font=('Arial', 17, "bold"), bg=BUTTONS, width=19,
                        height=3, highlightcolor=BLACK, bd=1, relief="solid",
-                       command=lambda event=None: remove(event, combo,
-                                                         options))
+                       command=lambda: remove(combo, options))
     update.place(x=290, y=25)
 
 
-def purchase(event, num_entry, combo, options, cost_entry):
+def purchase(num_entry, combo, options, cost_entry):
     """validate the entries and get the data need to update the database"""
     # validate entries
     try:
@@ -173,10 +167,12 @@ def purchase(event, num_entry, combo, options, cost_entry):
                                                 purchase FROM Products WHERE
                                                 name = "{combo.get()}";""", 1)
 
-                current_total_value = results[0][1] * results[0][0]
+                current_total_value = (results[0][1] + results[0][2]) * \
+                    results[0][0]
                 new_total_value = int(num_entry.get()) * \
                     float(cost_entry.get())
-                total_quantity = results[0][1] + int(num_entry.get())
+                total_quantity = results[0][1] + results[0][2] + \
+                    int(num_entry.get())
                 total_value = current_total_value + new_total_value
                 new_cost = total_value / total_quantity
                 main.save_changes("Products", "cost", new_cost, "name",
@@ -201,7 +197,7 @@ def product_purchase(frame):
     """All the buttons and labels for product purchase in mang_frame"""
 
     # labels
-    main.label(frame, "Select product", 20, 620, 150,BG_COLOR)
+    main.label(frame, "Select product", 20, 620, 150, BG_COLOR)
     main.label(frame, "Amount\npurchased", 20, 60, 80, BG_COLOR)
     main.label(frame, "Cost", 20, 80, 200, BG_COLOR)
 
@@ -219,22 +215,20 @@ def product_purchase(frame):
     combo.place(x=600, y=200, height=40)
 
     # Bind key release to the search function
-    combo.bind('<KeyRelease>', lambda event: main.on_type(event, combo,
-                                                          options))
-    combo.bind('<Return>', lambda event: main.validate(event, num_entry,
-                                                       combo, options, 2))
-    num_entry.bind('<Return>', lambda event: main.validate(event, num_entry,
-                                                           combo, options, 2))
-    cost_entry.bind('<Return>', lambda event: main.validate(event, num_entry,
-                                                            combo, options, 2))
+    combo.bind('<KeyRelease>', lambda event: main.on_type(combo, options))
+    combo.bind('<Return>', lambda event: purchase(num_entry, combo, options,
+                                                  cost_entry))
+    num_entry.bind('<Return>', lambda event: purchase(num_entry, combo,
+                                                      options, cost_entry))
+    cost_entry.bind('<Return>', lambda event: purchase(num_entry, combo,
+                                                       options, cost_entry))
 
     # buttons
     save_changes = tk.Button(frame, text="Save changes", cursor="hand2",
                              font=('Arial', 17, "bold"), bg=BUTTONS, width=19,
                              height=3, highlightcolor=BLACK, bd=1,
-                             relief="solid", command=lambda event=None:
-                             purchase(event, num_entry, combo, options,
-                                      cost_entry))
+                             relief="solid", command=lambda: purchase
+                             (num_entry, combo, options, cost_entry))
     save_changes.place(x=590, y=25)
 
 
@@ -246,8 +240,8 @@ def make_report(staff_name):
     # put the results into the products .py function
     for x in range(0, len(results)):
         product = products.products(results[x][0], results[x][8],
-                                         results[x][2], results[x][2],
-                                         results[x][3], results[x][4])
+                                    results[x][2], results[x][2],
+                                    results[x][3], results[x][4])
         product.stock_sold(results[x][5])
         product.inventory_count(results[x][7])
         product.stock_purchase(results[x][6])
@@ -276,12 +270,11 @@ def stock_sold(frame, staff_name):
     combo.place(x=300, y=150, height=40)
 
     # Bind key release to the search function
-    combo.bind('<KeyRelease>', lambda event: main.on_type(event, combo,
-                                                          options))
-    combo.bind('<Return>', lambda event: main.validate(event, num_entry,
-                                                       combo, options, 2))
-    num_entry.bind('<Return>', lambda event: main.validate(event, num_entry,
-                                                           combo, options, 2))
+    combo.bind('<KeyRelease>', lambda event: main.on_type(combo, options))
+    combo.bind('<Return>', lambda event: main.validate(num_entry, combo,
+                                                       options, 2))
+    num_entry.bind('<Return>', lambda event: main.validate(num_entry, combo,
+                                                           options, 2))
 
     # buttons
     gen_report = tk.Button(frame, text="Generate report", cursor="hand2",
@@ -293,9 +286,8 @@ def stock_sold(frame, staff_name):
     Save_changes = tk.Button(frame, text="Save changes", cursor="hand2",
                              font=('Arial', 17, "bold"), bg=BUTTONS, width=19,
                              height=3, highlightcolor=BLACK, bd=1,
-                             relief="solid", command=lambda event=None:
-                             main.validate(event, num_entry, combo, options,
-                                           2))
+                             relief="solid", command=lambda:
+                             main.validate(num_entry, combo, options, 2))
     Save_changes.place(x=590, y=25)
 
 
@@ -323,22 +315,26 @@ def inventory_management(frame, staff_name):
     sold = tk.Button(page_frame, text="Stock Sold", cursor="hand2",
                      font=('Arial', 17, "bold"), bg=LABEL_COLOR, width=13,
                      height=4, highlightcolor=BLACK, bd=1, relief="solid",
-                     command=lambda: main.show_frame(None, sold_frame, "no"))
+                     command=lambda: main.show_frame
+                     (None, sold_frame, "no", sold, (purchase, remove, add)))
     sold.place(x=5, y=15)
     purchase = tk.Button(page_frame, text="Stock purchase", cursor="hand2",
                          font=('Arial', 17, "bold"), bg=LABEL_COLOR, width=13,
                          height=4, highlightcolor=BLACK, bd=1, relief="solid",
                          command=lambda: main.show_frame(None, purchase_frame,
-                                                         "no"))
+                                                         "no", purchase,
+                                                         (sold, remove, add)))
     purchase.place(x=210, y=15)
     remove = tk.Button(page_frame, text="Remove a \nproduct", cursor="hand2",
                        font=('Arial', 17, "bold"), bg=LABEL_COLOR, width=13,
                        height=4, highlightcolor=BLACK, bd=1, relief="solid",
                        command=lambda: main.show_frame(None, remove_frame,
-                                                       "no"))
+                                                       "no", remove,
+                                                       (sold, purchase, add)))
     remove.place(x=420, y=15)
     add = tk.Button(page_frame, text="add a product", cursor="hand2",
-                    font=('Arial', 17, "bold"), bg=LABEL_COLOR, width=13,
+                    font=('Arial', 17, "bold"), bg=BG_COLOR, width=13,
                     height=4, highlightcolor=BLACK, bd=1, relief="solid",
-                    command=lambda: main.show_frame(None, add_frame, "no"))
+                    command=lambda: main.show_frame
+                    (None, add_frame, "no", add, (sold, purchase, remove)))
     add.place(x=630, y=15)

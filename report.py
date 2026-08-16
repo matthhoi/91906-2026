@@ -1,6 +1,6 @@
 """This program is generating a report based on the info given by the calling
 program
-By: Matt Smith                                                    22/07/2026"""
+By: Matt Smith                                                    13/08/2026"""
 
 # import modules
 from tkinter import messagebox
@@ -39,8 +39,8 @@ def report(inventory_list, staff_name):
             total_old += item[2]
             total_new += item[6]
             inv_value += (item[6])*item[5]
-            total_sold += item[3]
-            total_sales += (item[3])*item[5]
+            total_sold += item[4]
+            total_sales += (item[4])*item[5]
             item_name = item[1][:23]  # Truncate name if too long
             report.write(f"{item[0]:<11}{item_name:<24}{item[2]:<7}"
                          f"{item[3]:<8}{(item[2]+item[3]):<8}"
