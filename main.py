@@ -17,6 +17,7 @@ BG_COLOR = "#cccccc"
 LABEL_COLOR = "#efefef"
 WHITE = "#ffffff"
 BLACK = "#000000"
+USER_ROLES = ["User", "Manager", "Admin"]
 
 # global variables
 exit = False
@@ -70,14 +71,14 @@ def permissions(window_main, frame, button, self, others):
     global staff_position
     # check if the user has the admin permissions
     if button == "manage users":
-        if staff_position == "Admin":
+        if staff_position == USER_ROLES[2]:
             show_frame(window_main, frame, "manage users", self, others)
         else:
             messagebox.showerror("Error", "You don't have the correct "
                                  "permissions")
     # check if the user has the admin or manager permissions
     elif button == "Inventory management":
-        if staff_position == "Manager" or staff_position == "Admin":
+        if staff_position == USER_ROLES[2] or staff_position == USER_ROLES[1]:
             show_frame(window_main, frame, "Inventory management", self,
                        others)
         else:
@@ -89,7 +90,8 @@ def validate(num_entry, combo, options, where):
     """validate the entries"""
     # validate entries
     try:
-        if num_entry.get().isdigit() > 0 and combo.get() in options:
+        if num_entry.get().isdigit() and int(num_entry.get()) > 0 and \
+            combo.get() in options:
             if where == 1:
                 save_changes("Products", "count", num_entry.get(), "name",
                              combo.get())

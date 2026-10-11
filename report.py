@@ -1,22 +1,51 @@
 """This program is generating a report based on the info given by the calling
 program
-By: Matt Smith                                                    13/08/2026"""
+By: Matt Smith                                                    21/08/2026"""
 
 # import modules
 from tkinter import messagebox
 from datetime import date
 import main
+import tkinter as tk
+from tkinter import filedialog
 
 # global variables
 today = date.today()
+file = True
 
 # Main program
 
 
 def report(inventory_list, staff_name):
+    """generates reports"""
+    global file
+    # file location
+    while file:
+            # Prevent an empty Tkinter window from staying open
+        root = tk.Tk()
+        root.withdraw()
+
+        # Open the "Save As" window and catch the chosen path
+        file_path = filedialog.asksaveasfilename(
+            initialdir="/",
+            title="Select Save Location",
+            defaultextension=".txt",
+            filetypes=[("Text files", "*.txt")]
+        )
+
+        # Check if the user selected a location or clicked Cancel
+        if file_path:
+            if file_path.find(".txt") > 0:
+                messagebox.showinfo("file location",
+                                    f"Valid file path: {file_path}")
+                file = False
+            else:
+                messagebox.showerror("error", "file has to be .txt")
+        else:
+            messagebox.showerror("error", "Save operation cancelled.")
+
     # generating reports
-    with open(f"Reports/report-{today.day}.{today.month}.{today.year}.txt", 
-              "w") as report:
+    with open(file_path, "w") as report:
         # Header Section
         report.write(f"{'------------------- Report -------------------':>17}"
                      f"\n{'Barcode':<11}{'Name':<14}{'(Qty)':<10}"

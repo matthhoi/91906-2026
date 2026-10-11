@@ -7,6 +7,7 @@ import tkinter as tk
 from tkinter import messagebox
 from tkinter import ttk
 import main
+import sqlite3
 
 BUTTONS = "#C5C2D0"
 BG_COLOR = "#cccccc"
@@ -22,8 +23,6 @@ def validate_add_user(combo, username, password, name):
     # get hightest id
     result = main.connect_with_database("""SELECT MAX(staff_id) FROM Staff;""",
                                         1)
-    user_names = main.connect_with_database("""SELECT username FROM Staff;""",
-                                            1)
 
     # create new id
     if result[0][0] is None:
@@ -32,7 +31,7 @@ def validate_add_user(combo, username, password, name):
         staff_id = result[0][0] + 1
 
     # cheek if username already exists
-    if not username.get() in user_names[0]:
+    try:
         # cheek the entries
         if combo.get() in PERMISSIONS and not username.get() == "" and not \
                 password.get() == "" and not name.get() == "":
@@ -50,7 +49,7 @@ def validate_add_user(combo, username, password, name):
         else:
             messagebox.showerror("error", "entries cant be blank or "
                                  "permissions has to be in options")
-    else:
+    except sqlite3.IntegrityError:
         messagebox.showerror("error", "username already exists choose another"
                              " one")
         username.delete(0, tk.END)
