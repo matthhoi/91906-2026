@@ -74,7 +74,7 @@ def report(inventory_list, staff_name):
             report.write(f"{item[0]:<11}{item_name:<24}{item[2]:<7}"
                          f"{item[3]:<8}{(item[2]+item[3]):<8}"
                          f"{item[6]:<8}{item[4]:<6}"
-                         f"{(((item[2]+item[3])-item[4]-item[6])*-1)}\n")
+                         f"{(((item[2]+item[3])-item[4]-item[6]))}\n")
             
             main.save_changes("products", "amount", item[4], "barcode", item[0])
             main.save_changes("products", "purchase", 0, "barcode", item[0])
